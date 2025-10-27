@@ -1,0 +1,301 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: houssam
+      changes:
+        - createTable:
+            tableName: client_expediteur
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: nom
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: prenom
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: telephone
+                  type: VARCHAR(20)
+              - column:
+                  name: adresse
+                  type: VARCHAR(255)
+
+  - changeSet:
+      id: 2
+      author: houssam
+      changes:
+        - createTable:
+            tableName: destinataire
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: nom
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: prenom
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: telephone
+                  type: VARCHAR(20)
+              - column:
+                  name: adresse
+                  type: VARCHAR(255)
+
+  - changeSet:
+      id: 3
+      author: houssam
+      changes:
+        - createTable:
+            tableName: zone
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: nom
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: code_postal
+                  type: VARCHAR(20)
+
+  - changeSet:
+      id: 4
+      author: houssam
+      changes:
+        - createTable:
+            tableName: livreur
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: nom
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: prenom
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: telephone
+                  type: VARCHAR(20)
+              - column:
+                  name: vehicule
+                  type: VARCHAR(50)
+              - column:
+                  name: zone_assignee
+                  type: BIGINT
+        - addForeignKeyConstraint:
+            baseTableName: livreur
+            baseColumnNames: zone_assignee
+            referencedTableName: zone
+            referencedColumnNames: id
+            constraintName: fk_livreur_zone
+
+  - changeSet:
+      id: 5
+      author: houssam
+      changes:
+        - createTable:
+            tableName: colis
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: description
+                  type: VARCHAR(500)
+              - column:
+                  name: poids
+                  type: DECIMAL(10,2)
+              - column:
+                  name: statut
+                  type: VARCHAR(50)
+              - column:
+                  name: priorite
+                  type: INT
+              - column:
+                  name: id_livreur
+                  type: BIGINT
+              - column:
+                  name: id_client
+                  type: BIGINT
+              - column:
+                  name: id_destinataire
+                  type: BIGINT
+              - column:
+                  name: id_zone
+                  type: BIGINT
+              - column:
+                  name: ville_destination
+                  type: VARCHAR(100)
+        - addForeignKeyConstraint:
+            baseTableName: colis
+            baseColumnNames: id_livreur
+            referencedTableName: livreur
+            referencedColumnNames: id
+            constraintName: fk_colis_livreur
+        - addForeignKeyConstraint:
+            baseTableName: colis
+            baseColumnNames: id_client
+            referencedTableName: client_expediteur
+            referencedColumnNames: id
+            constraintName: fk_colis_client
+        - addForeignKeyConstraint:
+            baseTableName: colis
+            baseColumnNames: id_destinataire
+            referencedTableName: destinataire
+            referencedColumnNames: id
+            constraintName: fk_colis_destinataire
+        - addForeignKeyConstraint:
+            baseTableName: colis
+            baseColumnNames: id_zone
+            referencedTableName: zone
+            referencedColumnNames: id
+            constraintName: fk_colis_zone
+
+  - changeSet:
+      id: 6
+      author: houssam
+      changes:
+        - createTable:
+            tableName: historique_livraison
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: id_colis
+                  type: BIGINT
+              - column:
+                  name: statut
+                  type: VARCHAR(50)
+              - column:
+                  name: date_changement
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: commentaire
+                  type: TEXT
+        - addForeignKeyConstraint:
+            baseTableName: historique_livraison
+            baseColumnNames: id_colis
+            referencedTableName: colis
+            referencedColumnNames: id
+            constraintName: fk_historique_colis
+
+  - changeSet:
+      id: 7
+      author: houssam
+      changes:
+        - createTable:
+            tableName: produit
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: nom
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: categorie
+                  type: VARCHAR(255)
+              - column:
+                  name: poids
+                  type: DECIMAL(10,2)
+              - column:
+                  name: prix
+                  type: DECIMAL(10,2)
+
+  - changeSet:
+      id: 8
+      author: houssam
+      changes:
+        - createTable:
+            tableName: colis_produit
+            columns:
+              - column:
+                  name: id_colis
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: id_produit
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: quantite
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: prix
+                  type: DECIMAL(10,2)
+              - column:
+                  name: date_ajout
+                  type: TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: colis_produit
+            baseColumnNames: id_colis
+            referencedTableName: colis
+            referencedColumnNames: id
+            constraintName: fk_colisproduit_colis
+        - addForeignKeyConstraint:
+            baseTableName: colis_produit
+            baseColumnNames: id_produit
+            referencedTableName: produit
+            referencedColumnNames: id
+            constraintName: fk_colisproduit_produit
