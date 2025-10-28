@@ -21,4 +21,8 @@ public interface ColisRepository extends JpaRepository<Colis, Long> {
     List<Colis> findByZone(Zone zone);
 
 
+    List<Colis> findByClientExpediteurAndStatutIn(ClientExpediteur client, List<StatutColis> statuts);
+
+    Page<Colis> findByStatut(StatutColis statut, Pageable pageable);
+
 }
