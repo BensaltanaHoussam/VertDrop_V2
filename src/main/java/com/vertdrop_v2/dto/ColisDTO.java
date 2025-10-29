@@ -3,6 +3,7 @@ package com.vertdrop_v2.dto;
 import com.vertdrop_v2.entity.StatutColis;
 import lombok.Data;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 public class ColisDTO {
@@ -18,5 +19,7 @@ public class ColisDTO {
     private DestinataireDTO destinataire;
     private LivreurDTO livreur;
     private ZoneDTO zone;
+    private List<HistoriqueLivraisonDTO> historiqueLivraisons;
+    private List<ColisProduitDTO> colisProduits;
 
 }
