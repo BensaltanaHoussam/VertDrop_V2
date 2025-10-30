@@ -2,6 +2,8 @@ package com.vertdrop_v2.service;
 
 import com.vertdrop_v2.dto.ColisDTO;
 import com.vertdrop_v2.entity.StatutColis;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -13,7 +15,7 @@ public interface ColisService {
 
     Optional<ColisDTO> findById(Long id);
 
-    List<ColisDTO> findAll();
+    Page<ColisDTO> findAll(Pageable pageable, StatutColis statut, Long zoneId, String keyword);
 
     void deleteById(Long id);
 

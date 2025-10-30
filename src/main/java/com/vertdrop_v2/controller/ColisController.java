@@ -2,8 +2,11 @@ package com.vertdrop_v2.controller;
 
 import com.vertdrop_v2.dto.ColisDTO;
 import com.vertdrop_v2.dto.UpdateStatusRequestDTO;
+import com.vertdrop_v2.entity.StatutColis;
 import com.vertdrop_v2.service.ColisService;
 import com.vertdrop_v2.service.LivreurService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,9 +27,16 @@ public class ColisController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ColisDTO>> getAllColis() {
-        return ResponseEntity.ok(colisService.findAll());
+    public ResponseEntity<Page<ColisDTO>> getAllColis(
+            Pageable pageable,
+            @RequestParam(required = false) StatutColis statut,
+            @RequestParam(required = false) Long zoneId,
+            @RequestParam(required = false) String keyword) {
+
+        Page<ColisDTO> colisPage = colisService.findAll(pageable, statut, zoneId, keyword);
+        return ResponseEntity.ok(colisPage);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<ColisDTO> getColisById(@PathVariable Long id) {
@@ -85,5 +95,18 @@ public class ColisController {
 
         List<ColisDTO> colisList = colisService.findByLivreurId(id);
         return ResponseEntity.ok(colisList);
+    }
+
+    @PutMapping("/{colisId}/assign-livreur/{livreurId}")
+    public ResponseEntity<ColisDTO> assignLivreurToColis(
+            @PathVariable Long colisId,
+            @PathVariable Long livreurId) {
+
+        try {
+            ColisDTO updatedColis = colisService.assignLivreur(colisId, livreurId);
+            return ResponseEntity.ok(updatedColis);
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

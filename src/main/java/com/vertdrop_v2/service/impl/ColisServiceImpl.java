@@ -11,6 +11,8 @@ import com.vertdrop_v2.repository.HistoriqueLivraisonRepository;
 import com.vertdrop_v2.repository.LivreurRepository;
 import com.vertdrop_v2.service.ColisService;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,12 +51,12 @@ public class ColisServiceImpl implements ColisService {
         return colisRepository.findById(id).map(colisMapper::toDto);
     }
 
+
     @Override
     @Transactional(readOnly = true)
-    public List<ColisDTO> findAll() {
-        return colisRepository.findAll().stream()
-                .map(colisMapper::toDto)
-                .collect(Collectors.toList());
+    public Page<ColisDTO> findAll(Pageable pageable, StatutColis statut, Long zoneId, String keyword) {
+        Page<Colis> colisPage = colisRepository.findWithFilters(statut, zoneId, keyword, pageable);
+        return colisPage.map(colisMapper::toDto);
     }
 
     @Override
