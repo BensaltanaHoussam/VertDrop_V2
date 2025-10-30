@@ -1,6 +1,7 @@
 package com.vertdrop_v2.controller;
 
 import com.vertdrop_v2.dto.ColisDTO;
+import com.vertdrop_v2.dto.UpdateStatusRequestDTO;
 import com.vertdrop_v2.service.ColisService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,5 +54,22 @@ public class ColisController {
         }
         colisService.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<ColisDTO> updateColisStatus(
+            @PathVariable Long id,
+            @RequestBody UpdateStatusRequestDTO statusRequest) {
+
+        try {
+            ColisDTO updatedColis = colisService.updateStatus(
+                    id,
+                    statusRequest.getNewStatus(),
+                    statusRequest.getComment()
+            );
+            return ResponseEntity.ok(updatedColis);
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
