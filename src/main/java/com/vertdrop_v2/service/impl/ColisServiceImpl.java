@@ -3,10 +3,12 @@ package com.vertdrop_v2.service.impl;
 import com.vertdrop_v2.dto.ColisDTO;
 import com.vertdrop_v2.entity.Colis;
 import com.vertdrop_v2.entity.HistoriqueLivraison;
+import com.vertdrop_v2.entity.Livreur;
 import com.vertdrop_v2.entity.StatutColis;
 import com.vertdrop_v2.mapper.ColisMapper;
 import com.vertdrop_v2.repository.ColisRepository;
 import com.vertdrop_v2.repository.HistoriqueLivraisonRepository;
+import com.vertdrop_v2.repository.LivreurRepository;
 import com.vertdrop_v2.service.ColisService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -23,11 +25,13 @@ public class ColisServiceImpl implements ColisService {
 
     private final ColisRepository colisRepository;
     private final HistoriqueLivraisonRepository historiqueRepository;
+    private final LivreurRepository livreurRepository;
     private final ColisMapper colisMapper;
 
-    public ColisServiceImpl(ColisRepository colisRepository,HistoriqueLivraisonRepository historiqueRepository , ColisMapper colisMapper) {
+    public ColisServiceImpl(ColisRepository colisRepository,HistoriqueLivraisonRepository historiqueRepository ,LivreurRepository livreurRepository , ColisMapper colisMapper) {
         this.colisRepository = colisRepository;
         this.historiqueRepository = historiqueRepository;
+        this.livreurRepository = livreurRepository;
         this.colisMapper = colisMapper;
     }
 
@@ -73,6 +77,18 @@ public class ColisServiceImpl implements ColisService {
 
         historiqueRepository.save(historyRecord);
 
+        return colisMapper.toDto(colis);
+    }
+
+
+    @Override
+    public ColisDTO assignLivreur(Long colisId, Long livreurId) {
+        Colis colis = colisRepository.findById(colisId)
+                .orElseThrow(() -> new EntityNotFoundException("Colis not found with id: " + colisId));
+        Livreur livreur = livreurRepository.findById(livreurId)
+                .orElseThrow(() -> new EntityNotFoundException("Livreur not found with id: " + livreurId));
+
+        colis.setLivreur(livreur);
         return colisMapper.toDto(colis);
     }
 }

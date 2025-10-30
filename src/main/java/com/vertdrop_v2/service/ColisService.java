@@ -17,4 +17,6 @@ public interface ColisService {
     void deleteById(Long id);
 
     ColisDTO updateStatus(Long colisId, StatutColis newStatus, String comment);
+
+    ColisDTO assignLivreur(Long colisId, Long livreurId);
 }
