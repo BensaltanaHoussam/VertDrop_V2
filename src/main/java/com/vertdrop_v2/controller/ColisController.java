@@ -86,4 +86,17 @@ public class ColisController {
         List<ColisDTO> colisList = colisService.findByLivreurId(id);
         return ResponseEntity.ok(colisList);
     }
+
+    @PutMapping("/{colisId}/assign-livreur/{livreurId}")
+    public ResponseEntity<ColisDTO> assignLivreurToColis(
+            @PathVariable Long colisId,
+            @PathVariable Long livreurId) {
+
+        try {
+            ColisDTO updatedColis = colisService.assignLivreur(colisId, livreurId);
+            return ResponseEntity.ok(updatedColis);
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
