@@ -4,6 +4,8 @@ import com.vertdrop_v2.dto.ColisDTO;
 import com.vertdrop_v2.dto.UpdateStatusRequestDTO;
 import com.vertdrop_v2.service.ColisService;
 import com.vertdrop_v2.service.LivreurService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +26,9 @@ public class ColisController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ColisDTO>> getAllColis() {
-        return ResponseEntity.ok(colisService.findAll());
+    public ResponseEntity<Page<ColisDTO>> getAllColis(Pageable pageable) {
+        Page<ColisDTO> colisPage = colisService.findAll(pageable);
+        return ResponseEntity.ok(colisPage);
     }
 
     @GetMapping("/{id}")
