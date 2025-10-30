@@ -15,7 +15,7 @@ public interface ColisService {
 
     Optional<ColisDTO> findById(Long id);
 
-    Page<ColisDTO> findAll(Pageable pageable);
+    Page<ColisDTO> findAll(Pageable pageable, StatutColis statut, Long zoneId);
 
     void deleteById(Long id);
 

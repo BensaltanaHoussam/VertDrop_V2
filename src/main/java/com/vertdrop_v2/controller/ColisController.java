@@ -2,6 +2,7 @@ package com.vertdrop_v2.controller;
 
 import com.vertdrop_v2.dto.ColisDTO;
 import com.vertdrop_v2.dto.UpdateStatusRequestDTO;
+import com.vertdrop_v2.entity.StatutColis;
 import com.vertdrop_v2.service.ColisService;
 import com.vertdrop_v2.service.LivreurService;
 import org.springframework.data.domain.Page;
@@ -26,10 +27,15 @@ public class ColisController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ColisDTO>> getAllColis(Pageable pageable) {
-        Page<ColisDTO> colisPage = colisService.findAll(pageable);
+    public ResponseEntity<Page<ColisDTO>> getAllColis(
+            Pageable pageable,
+            @RequestParam(required = false) StatutColis statut,
+            @RequestParam(required = false) Long zoneId) {
+
+        Page<ColisDTO> colisPage = colisService.findAll(pageable, statut, zoneId);
         return ResponseEntity.ok(colisPage);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<ColisDTO> getColisById(@PathVariable Long id) {

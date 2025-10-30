@@ -31,6 +31,14 @@ public interface ColisRepository extends JpaRepository<Colis, Long> {
     @Query("SELECT COALESCE(SUM(c.poids), 0) FROM Colis c WHERE c.zone.id = :zoneId")
     BigDecimal sumPoidsByZone(@Param("zoneId") Long zoneId);
 
+    @Query("SELECT c FROM Colis c WHERE " +
+            "(:statut IS NULL OR c.statut = :statut) AND " +
+            "(:zoneId IS NULL OR c.zone.id = :zoneId)")
+    Page<Colis> findWithFilters(
+            @Param("statut") StatutColis statut,
+            @Param("zoneId") Long zoneId,
+            Pageable pageable);
+
 
     List<Colis> findByLivreurId(Long livreurId);
 }
