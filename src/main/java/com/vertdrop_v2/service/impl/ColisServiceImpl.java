@@ -2,12 +2,17 @@ package com.vertdrop_v2.service.impl;
 
 import com.vertdrop_v2.dto.ColisDTO;
 import com.vertdrop_v2.entity.Colis;
+import com.vertdrop_v2.entity.HistoriqueLivraison;
+import com.vertdrop_v2.entity.StatutColis;
 import com.vertdrop_v2.mapper.ColisMapper;
 import com.vertdrop_v2.repository.ColisRepository;
+import com.vertdrop_v2.repository.HistoriqueLivraisonRepository;
 import com.vertdrop_v2.service.ColisService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -17,10 +22,12 @@ import java.util.stream.Collectors;
 public class ColisServiceImpl implements ColisService {
 
     private final ColisRepository colisRepository;
+    private final HistoriqueLivraisonRepository historiqueRepository;
     private final ColisMapper colisMapper;
 
-    public ColisServiceImpl(ColisRepository colisRepository, ColisMapper colisMapper) {
+    public ColisServiceImpl(ColisRepository colisRepository,HistoriqueLivraisonRepository historiqueRepository , ColisMapper colisMapper) {
         this.colisRepository = colisRepository;
+        this.historiqueRepository = historiqueRepository;
         this.colisMapper = colisMapper;
     }
 
@@ -48,5 +55,24 @@ public class ColisServiceImpl implements ColisService {
     @Override
     public void deleteById(Long id) {
         colisRepository.deleteById(id);
+    }
+
+
+    @Override
+    public ColisDTO updateStatus(Long colisId, StatutColis newStatus, String comment) {
+        Colis colis = colisRepository.findById(colisId)
+                .orElseThrow(() -> new EntityNotFoundException("Colis not found with id: " + colisId));
+
+        colis.setStatut(newStatus);
+
+        HistoriqueLivraison historyRecord = new HistoriqueLivraison();
+        historyRecord.setColis(colis);
+        historyRecord.setStatut(newStatus);
+        historyRecord.setDateChangement(LocalDateTime.now());
+        historyRecord.setCommentaire(comment);
+
+        historiqueRepository.save(historyRecord);
+
+        return colisMapper.toDto(colis);
     }
 }
