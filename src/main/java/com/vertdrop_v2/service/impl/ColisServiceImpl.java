@@ -14,6 +14,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -90,5 +91,13 @@ public class ColisServiceImpl implements ColisService {
 
         colis.setLivreur(livreur);
         return colisMapper.toDto(colis);
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public BigDecimal calculateTotalWeightByZone(Long zoneId) {
+
+        return colisRepository.sumPoidsByZone(zoneId);
     }
 }
