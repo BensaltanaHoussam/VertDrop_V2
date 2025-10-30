@@ -54,8 +54,8 @@ public class ColisServiceImpl implements ColisService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ColisDTO> findAll(Pageable pageable, StatutColis statut, Long zoneId) {
-        Page<Colis> colisPage = colisRepository.findWithFilters(statut, zoneId, pageable);
+    public Page<ColisDTO> findAll(Pageable pageable, StatutColis statut, Long zoneId, String keyword) {
+        Page<Colis> colisPage = colisRepository.findWithFilters(statut, zoneId, keyword, pageable);
         return colisPage.map(colisMapper::toDto);
     }
 

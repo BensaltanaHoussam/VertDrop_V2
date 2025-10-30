@@ -30,9 +30,10 @@ public class ColisController {
     public ResponseEntity<Page<ColisDTO>> getAllColis(
             Pageable pageable,
             @RequestParam(required = false) StatutColis statut,
-            @RequestParam(required = false) Long zoneId) {
+            @RequestParam(required = false) Long zoneId,
+            @RequestParam(required = false) String keyword) {
 
-        Page<ColisDTO> colisPage = colisService.findAll(pageable, statut, zoneId);
+        Page<ColisDTO> colisPage = colisService.findAll(pageable, statut, zoneId, keyword);
         return ResponseEntity.ok(colisPage);
     }
 
