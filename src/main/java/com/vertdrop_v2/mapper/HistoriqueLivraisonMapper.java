@@ -8,8 +8,5 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface HistoriqueLivraisonMapper {
 
-
-    HistoriqueLivraisonDTO toDto(HistoriqueLivraison entity);
-
-    HistoriqueLivraison toEntity(HistoriqueLivraisonDTO dto);
+    HistoriqueLivraisonDTO toDto(HistoriqueLivraison historiqueLivraison);
 }

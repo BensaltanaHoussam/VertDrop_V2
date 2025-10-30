@@ -1,6 +1,7 @@
 package com.vertdrop_v2.controller;
 
 import com.vertdrop_v2.dto.ColisDTO;
+import com.vertdrop_v2.dto.HistoriqueLivraisonDTO;
 import com.vertdrop_v2.dto.UpdateStatusRequestDTO;
 import com.vertdrop_v2.entity.StatutColis;
 import com.vertdrop_v2.service.ColisService;
@@ -108,5 +109,16 @@ public class ColisController {
         } catch (jakarta.persistence.EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+
+    @GetMapping("/{id}/history")
+    public ResponseEntity<List<HistoriqueLivraisonDTO>> getColisHistory(@PathVariable Long id) {
+        if (!colisService.findById(id).isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<HistoriqueLivraisonDTO> history = colisService.findHistoryForColis(id);
+        return ResponseEntity.ok(history);
     }
 }

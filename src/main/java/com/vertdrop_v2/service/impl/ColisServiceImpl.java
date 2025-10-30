@@ -1,11 +1,13 @@
 package com.vertdrop_v2.service.impl;
 
 import com.vertdrop_v2.dto.ColisDTO;
+import com.vertdrop_v2.dto.HistoriqueLivraisonDTO;
 import com.vertdrop_v2.entity.Colis;
 import com.vertdrop_v2.entity.HistoriqueLivraison;
 import com.vertdrop_v2.entity.Livreur;
 import com.vertdrop_v2.entity.StatutColis;
 import com.vertdrop_v2.mapper.ColisMapper;
+import com.vertdrop_v2.mapper.HistoriqueLivraisonMapper;
 import com.vertdrop_v2.repository.ColisRepository;
 import com.vertdrop_v2.repository.HistoriqueLivraisonRepository;
 import com.vertdrop_v2.repository.LivreurRepository;
@@ -27,13 +29,15 @@ import java.util.stream.Collectors;
 public class ColisServiceImpl implements ColisService {
 
     private final ColisRepository colisRepository;
-    private final HistoriqueLivraisonRepository historiqueRepository;
+    private final HistoriqueLivraisonRepository historiqueLivraisonRepository;
+    private final HistoriqueLivraisonMapper historiqueLivraisonMapper;
     private final LivreurRepository livreurRepository;
     private final ColisMapper colisMapper;
 
-    public ColisServiceImpl(ColisRepository colisRepository, HistoriqueLivraisonRepository historiqueRepository, LivreurRepository livreurRepository, ColisMapper colisMapper) {
+    public ColisServiceImpl(ColisRepository colisRepository, HistoriqueLivraisonRepository historiqueLivraisonRepository, HistoriqueLivraisonMapper historiqueLivraisonMapper, LivreurRepository livreurRepository, ColisMapper colisMapper) {
         this.colisRepository = colisRepository;
-        this.historiqueRepository = historiqueRepository;
+        this.historiqueLivraisonRepository = historiqueLivraisonRepository;
+        this.historiqueLivraisonMapper = historiqueLivraisonMapper;
         this.livreurRepository = livreurRepository;
         this.colisMapper = colisMapper;
     }
@@ -78,7 +82,7 @@ public class ColisServiceImpl implements ColisService {
         historyRecord.setDateChangement(LocalDateTime.now());
         historyRecord.setCommentaire(comment);
 
-        historiqueRepository.save(historyRecord);
+        historiqueLivraisonRepository.save(historyRecord);
 
         return colisMapper.toDto(colis);
     }
@@ -113,6 +117,15 @@ public class ColisServiceImpl implements ColisService {
                 .collect(Collectors.toList());
 
 
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<HistoriqueLivraisonDTO> findHistoryForColis(Long colisId) {
+        return historiqueLivraisonRepository.findByColisIdOrderByDateChangementDesc(colisId)
+                .stream()
+                .map(historiqueLivraisonMapper::toDto)
+                .collect(Collectors.toList());
     }
 
 }
