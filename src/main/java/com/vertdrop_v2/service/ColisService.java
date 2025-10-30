@@ -22,4 +22,6 @@ public interface ColisService {
     ColisDTO assignLivreur(Long colisId, Long livreurId);
 
     BigDecimal calculateTotalWeightByZone(Long zoneId);
+
+    List<ColisDTO> findByLivreurId(Long livreurId);
 }

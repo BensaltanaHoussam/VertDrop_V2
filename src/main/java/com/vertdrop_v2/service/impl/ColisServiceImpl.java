@@ -29,7 +29,7 @@ public class ColisServiceImpl implements ColisService {
     private final LivreurRepository livreurRepository;
     private final ColisMapper colisMapper;
 
-    public ColisServiceImpl(ColisRepository colisRepository,HistoriqueLivraisonRepository historiqueRepository ,LivreurRepository livreurRepository , ColisMapper colisMapper) {
+    public ColisServiceImpl(ColisRepository colisRepository, HistoriqueLivraisonRepository historiqueRepository, LivreurRepository livreurRepository, ColisMapper colisMapper) {
         this.colisRepository = colisRepository;
         this.historiqueRepository = historiqueRepository;
         this.livreurRepository = livreurRepository;
@@ -100,4 +100,17 @@ public class ColisServiceImpl implements ColisService {
 
         return colisRepository.sumPoidsByZone(zoneId);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ColisDTO> findByLivreurId(Long livreurId) {
+
+        List<Colis> colisList = colisRepository.findByLivreurId(livreurId);
+        return colisList.stream()
+                .map(colisMapper::toDto)
+                .collect(Collectors.toList());
+
+
+    }
+
 }
