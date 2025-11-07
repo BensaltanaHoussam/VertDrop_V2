@@ -4,20 +4,28 @@ import com.vertdrop_v2.dto.ColisDTO;
 import com.vertdrop_v2.dto.HistoriqueLivraisonDTO;
 import com.vertdrop_v2.dto.UpdateStatusRequestDTO;
 import com.vertdrop_v2.entity.StatutColis;
+import com.vertdrop_v2.exception.NotFoundException;
 import com.vertdrop_v2.service.ColisService;
 import com.vertdrop_v2.service.LivreurService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/colis")
+@Validated
 public class ColisController {
 
+    private static final Logger log = LoggerFactory.getLogger(ColisController.class);
 
     private final LivreurService livreurService;
     private final ColisService colisService;
@@ -31,93 +39,89 @@ public class ColisController {
     public ResponseEntity<Page<ColisDTO>> getAllColis(
             Pageable pageable,
             @RequestParam(required = false) StatutColis statut,
-            @RequestParam(required = false) Long zoneId,
+            @RequestParam(required = false) @Positive(message = "L'identifiant de zone doit être un entier positif") Long zoneId,
             @RequestParam(required = false) String keyword) {
-
+        log.info("GET /api/colis statut={}, zoneId={}, keyword={}", statut, zoneId, keyword);
         Page<ColisDTO> colisPage = colisService.findAll(pageable, statut, zoneId, keyword);
         return ResponseEntity.ok(colisPage);
     }
 
-
     @GetMapping("/{id}")
-    public ResponseEntity<ColisDTO> getColisById(@PathVariable Long id) {
-        return colisService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ColisDTO> getColisById(
+            @PathVariable @Positive(message = "L'identifiant doit être un entier positif") Long id) {
+        log.info("GET /api/colis/{}", id);
+        ColisDTO dto = colisService.findById(id)
+                .orElseThrow(() -> new NotFoundException("Colis introuvable id=" + id));
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping
-    public ResponseEntity<ColisDTO> createColis(@RequestBody ColisDTO colisDTO) {
+    public ResponseEntity<ColisDTO> createColis(@Valid @RequestBody ColisDTO colisDTO) {
+        log.info("POST /api/colis");
         ColisDTO savedColis = colisService.save(colisDTO);
         return new ResponseEntity<>(savedColis, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ColisDTO> updateColis(@PathVariable Long id, @RequestBody ColisDTO colisDTO) {
-        if (!colisService.findById(id).isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<ColisDTO> updateColis(
+            @PathVariable @Positive(message = "L'identifiant doit être un entier positif") Long id,
+            @Valid @RequestBody ColisDTO colisDTO) {
+        colisService.findById(id)
+                .orElseThrow(() -> new NotFoundException("Colis introuvable id=" + id));
         colisDTO.setId(id);
+        log.info("PUT /api/colis/{}", id);
         ColisDTO updatedColis = colisService.save(colisDTO);
         return ResponseEntity.ok(updatedColis);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteColis(@PathVariable Long id) {
-        if (!colisService.findById(id).isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Void> deleteColis(
+            @PathVariable @Positive(message = "L'identifiant doit être un entier positif") Long id) {
+        colisService.findById(id)
+                .orElseThrow(() -> new NotFoundException("Colis introuvable id=" + id));
+        log.info("DELETE /api/colis/{}", id);
         colisService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}/status")
     public ResponseEntity<ColisDTO> updateColisStatus(
-            @PathVariable Long id,
-            @RequestBody UpdateStatusRequestDTO statusRequest) {
-
-        try {
-            ColisDTO updatedColis = colisService.updateStatus(
-                    id,
-                    statusRequest.getNewStatus(),
-                    statusRequest.getComment()
-            );
-            return ResponseEntity.ok(updatedColis);
-        } catch (jakarta.persistence.EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+            @PathVariable @Positive(message = "L'identifiant doit être un entier positif") Long id,
+            @Valid @RequestBody UpdateStatusRequestDTO statusRequest) {
+        log.info("PUT /api/colis/{}/status -> {}", id, statusRequest.getStatut());
+        ColisDTO updatedColis = colisService.updateStatus(
+                id,
+                statusRequest.getStatut(),
+                statusRequest.getCommentaire()
+        );
+        return ResponseEntity.ok(updatedColis);
     }
 
     @GetMapping("/{id}/colis")
-    public ResponseEntity<List<ColisDTO>> getColisForLivreur(@PathVariable Long id) {
-        if (!livreurService.findById(id).isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
-
+    public ResponseEntity<List<ColisDTO>> getColisForLivreur(
+            @PathVariable @Positive(message = "L'identifiant doit être un entier positif") Long id) {
+        livreurService.findById(id)
+                .orElseThrow(() -> new NotFoundException("Livreur introuvable id=" + id));
+        log.info("GET /api/colis/{}/colis", id);
         List<ColisDTO> colisList = colisService.findByLivreurId(id);
         return ResponseEntity.ok(colisList);
     }
 
     @PutMapping("/{colisId}/assign-livreur/{livreurId}")
     public ResponseEntity<ColisDTO> assignLivreurToColis(
-            @PathVariable Long colisId,
-            @PathVariable Long livreurId) {
-
-        try {
-            ColisDTO updatedColis = colisService.assignLivreur(colisId, livreurId);
-            return ResponseEntity.ok(updatedColis);
-        } catch (jakarta.persistence.EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+            @PathVariable("colisId") @Positive(message = "L'identifiant doit être un entier positif") Long colisId,
+            @PathVariable("livreurId") @Positive(message = "L'identifiant doit être un entier positif") Long livreurId) {
+        log.info("PUT /api/colis/{}/assign-livreur/{}", colisId, livreurId);
+        ColisDTO updatedColis = colisService.assignLivreur(colisId, livreurId);
+        return ResponseEntity.ok(updatedColis);
     }
 
-
     @GetMapping("/{id}/history")
-    public ResponseEntity<List<HistoriqueLivraisonDTO>> getColisHistory(@PathVariable Long id) {
-        if (!colisService.findById(id).isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
-
+    public ResponseEntity<List<HistoriqueLivraisonDTO>> getColisHistory(
+            @PathVariable @Positive(message = "L'identifiant doit être un entier positif") Long id) {
+        colisService.findById(id)
+                .orElseThrow(() -> new NotFoundException("Colis introuvable id=" + id));
+        log.info("GET /api/colis/{}/history", id);
         List<HistoriqueLivraisonDTO> history = colisService.findHistoryForColis(id);
         return ResponseEntity.ok(history);
     }
