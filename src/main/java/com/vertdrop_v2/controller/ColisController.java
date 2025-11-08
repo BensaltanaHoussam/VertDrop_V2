@@ -1,5 +1,6 @@
 package com.vertdrop_v2.controller;
 
+import com.vertdrop_v2.dto.ColisCreateRequestDTO;
 import com.vertdrop_v2.dto.ColisDTO;
 import com.vertdrop_v2.dto.HistoriqueLivraisonDTO;
 import com.vertdrop_v2.dto.UpdateStatusRequestDTO;
@@ -66,16 +67,16 @@ public class ColisController {
     }
 
     @PostMapping
-    @Operation(summary = "Créer un colis", description = "Crée un nouveau colis.")
+    @Operation(summary = "Créer un colis", description = "Crée un colis (références par ID).")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Colis créé"),
             @ApiResponse(responseCode = "400", description = "Données invalides")
     })
-    public ResponseEntity<ColisDTO> createColis(@Valid @RequestBody ColisDTO colisDTO) {
-        log.info("POST /api/colis");
-        return new ResponseEntity<>(colisService.save(colisDTO), HttpStatus.CREATED);
+    public ResponseEntity<ColisDTO> createColis(@Valid @RequestBody ColisCreateRequestDTO req) {
+        log.info("POST /api/colis (request DTO)");
+        ColisDTO dto = colisService.createFromRequest(req);
+        return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
-
     @PutMapping("/{id}")
     @Operation(summary = "Mettre à jour un colis", description = "Met à jour un colis existant.")
     @ApiResponses({
@@ -116,7 +117,7 @@ public class ColisController {
             @PathVariable @Positive Long id,
             @Valid @RequestBody UpdateStatusRequestDTO statusRequest) {
         log.info("PUT /api/colis/{}/status -> {}", id, statusRequest.getStatut());
-        return ResponseEntity.ok(colisService.updateStatus(id, statusRequest.getStatut(), statusRequest.getCommentaire()));
+        return ResponseEntity.ok(colisService.updateStatus(id, StatutColis.valueOf(statusRequest.getStatut().toUpperCase()), statusRequest.getCommentaire()));
     }
 
     @GetMapping("/{id}/colis")
