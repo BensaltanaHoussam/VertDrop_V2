@@ -3,6 +3,10 @@ package com.vertdrop_v2.controller;
 import com.vertdrop_v2.dto.ProduitDTO;
 import com.vertdrop_v2.exception.NotFoundException;
 import com.vertdrop_v2.service.ProduitService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.slf4j.Logger;
@@ -16,6 +20,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/produits")
+@Tag(name = "Produits", description = "Endpoints de gestion des produits")
 @Validated
 public class ProduitController {
 
@@ -27,14 +32,20 @@ public class ProduitController {
     }
 
     @GetMapping
+    @Operation(summary = "Lister les produits", description = "Retourne tous les produits.")
+    @ApiResponses(@ApiResponse(responseCode = "200", description = "Liste"))
     public ResponseEntity<List<ProduitDTO>> getAllProduits() {
         log.info("GET /api/produits");
         return ResponseEntity.ok(produitService.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProduitDTO> getProduitById(
-            @PathVariable @Positive(message = "L'identifiant doit être un entier positif") Long id) {
+    @Operation(summary = "Récupérer un produit", description = "Retourne un produit par identifiant.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Trouvé"),
+            @ApiResponse(responseCode = "404", description = "Introuvable")
+    })
+    public ResponseEntity<ProduitDTO> getProduitById(@PathVariable @Positive Long id) {
         log.info("GET /api/produits/{}", id);
         ProduitDTO dto = produitService.findById(id)
                 .orElseThrow(() -> new NotFoundException("Produit introuvable id=" + id));
@@ -42,27 +53,39 @@ public class ProduitController {
     }
 
     @PostMapping
+    @Operation(summary = "Créer un produit", description = "Crée un nouveau produit.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Créé"),
+            @ApiResponse(responseCode = "400", description = "Données invalides")
+    })
     public ResponseEntity<ProduitDTO> createProduit(@Valid @RequestBody ProduitDTO produitDTO) {
         log.info("POST /api/produits");
-        ProduitDTO savedProduit = produitService.save(produitDTO);
-        return new ResponseEntity<>(savedProduit, HttpStatus.CREATED);
+        return new ResponseEntity<>(produitService.save(produitDTO), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Mettre à jour un produit", description = "Met à jour un produit existant.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Mis à jour"),
+            @ApiResponse(responseCode = "404", description = "Introuvable")
+    })
     public ResponseEntity<ProduitDTO> updateProduit(
-            @PathVariable @Positive(message = "L'identifiant doit être un entier positif") Long id,
+            @PathVariable @Positive Long id,
             @Valid @RequestBody ProduitDTO produitDTO) {
         produitService.findById(id)
                 .orElseThrow(() -> new NotFoundException("Produit introuvable id=" + id));
         produitDTO.setId(id);
         log.info("PUT /api/produits/{}", id);
-        ProduitDTO updatedProduit = produitService.save(produitDTO);
-        return ResponseEntity.ok(updatedProduit);
+        return ResponseEntity.ok(produitService.save(produitDTO));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduit(
-            @PathVariable @Positive(message = "L'identifiant doit être un entier positif") Long id) {
+    @Operation(summary = "Supprimer un produit", description = "Supprime un produit.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Supprimé"),
+            @ApiResponse(responseCode = "404", description = "Introuvable")
+    })
+    public ResponseEntity<Void> deleteProduit(@PathVariable @Positive Long id) {
         produitService.findById(id)
                 .orElseThrow(() -> new NotFoundException("Produit introuvable id=" + id));
         log.info("DELETE /api/produits/{}", id);

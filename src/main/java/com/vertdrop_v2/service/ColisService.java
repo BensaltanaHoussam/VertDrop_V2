@@ -1,5 +1,6 @@
 package com.vertdrop_v2.service;
 
+import com.vertdrop_v2.dto.ColisCreateRequestDTO;
 import com.vertdrop_v2.dto.ColisDTO;
 import com.vertdrop_v2.dto.HistoriqueLivraisonDTO;
 import com.vertdrop_v2.entity.StatutColis;
@@ -13,6 +14,8 @@ import java.util.Optional;
 public interface ColisService {
 
     ColisDTO save(ColisDTO colisDTO);
+
+    ColisDTO createFromRequest(ColisCreateRequestDTO req);
 
     Optional<ColisDTO> findById(Long id);
 
