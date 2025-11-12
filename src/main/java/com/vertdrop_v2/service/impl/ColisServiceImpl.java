@@ -242,13 +242,4 @@ public class ColisServiceImpl implements ColisService {
 
 
 
-
-
-    public List<Object> getColisCrees() {
-        return colisRepository.findByStatut(StatutColis.CREE)
-                .stream()
-                .map(colisMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
 }
