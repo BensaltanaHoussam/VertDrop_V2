@@ -85,6 +85,11 @@
             <scope>test</scope> <!-- Important : Ces dépendances ne sont utilisées que pour les tests -->
         </dependency>
 
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
 
 
     </dependencies>
