@@ -3,7 +3,6 @@ package com.vertdrop_v2.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vertdrop_v2.dto.ColisDTO;
 import com.vertdrop_v2.dto.LivreurDTO;
-import com.vertdrop_v2.entity.StatutLivreur;
 import com.vertdrop_v2.exception.GlobalExceptionHandler;
 import com.vertdrop_v2.exception.NotFoundException;
 import com.vertdrop_v2.service.ColisService;
@@ -29,7 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Suite de tests complète pour LivreurController.
+ * Suite de tests complète et corrigée pour LivreurController.
  */
 @WebMvcTest(controllers = LivreurController.class,
         excludeAutoConfiguration = {SecurityAutoConfiguration.class})
@@ -42,7 +41,6 @@ class LivreurControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // Le LivreurController dépend de deux services, il faut mocker les deux.
     @MockBean
     private LivreurService livreurService;
 
@@ -53,13 +51,14 @@ class LivreurControllerTest {
 
     @BeforeEach
     void setUp() {
-        // Création d'un DTO valide pour les tests
+        // Création d'un DTO valide basé sur la définition exacte de LivreurDTO.java
         validLivreurDTO = new LivreurDTO();
         validLivreurDTO.setId(1L);
         validLivreurDTO.setNom("Martin");
         validLivreurDTO.setPrenom("Paul");
         validLivreurDTO.setTelephone("0611223344");
-        validLivreurDTO.setStatut(StatutLivreur.ACTIF);
+        validLivreurDTO.setVehicule("Scooter 125");
+        validLivreurDTO.setZoneAssignee(1L);
     }
 
     @Test
@@ -95,8 +94,11 @@ class LivreurControllerTest {
         inputDTO.setNom("Nouveau");
         inputDTO.setPrenom("Livreur");
         inputDTO.setTelephone("0655443322");
-        inputDTO.setStatut(StatutLivreur.ACTIF);
+        inputDTO.setVehicule("Vélo électrique");
+        inputDTO.setZoneAssignee(2L);
 
+        // On s'attend à ce que le service retourne un DTO avec un ID.
+        // On réutilise validLivreurDTO pour la réponse.
         when(livreurService.save(any(LivreurDTO.class))).thenReturn(validLivreurDTO);
 
         mockMvc.perform(post("/api/livreurs")
