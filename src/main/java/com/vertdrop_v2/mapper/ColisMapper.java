@@ -22,4 +22,6 @@ public interface ColisMapper {
     @Mapping(target = "historiqueLivraisons", ignore = true)
     @Mapping(target = "colisProduits", ignore = true)
     Colis toEntity(ColisDTO dto);
+
+    Object toDTO(Colis colis);
 }
