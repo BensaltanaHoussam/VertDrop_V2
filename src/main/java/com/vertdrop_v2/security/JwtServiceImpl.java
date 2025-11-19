@@ -17,12 +17,15 @@ import java.util.stream.Collectors;
 public class JwtServiceImpl implements JwtService {
 
     @Value("${jwt.secret}")
-    private String secret; // Base64 encoded (32 bytes)
+    private String secret;
 
     @Value("${jwt.expiration-ms:86400000}")
     private long jwtExpirationMs;
 
     private SecretKey getSigningKey() {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("JWT secret non configuré (propriété 'jwt.secret').");
+        }
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
@@ -44,10 +47,8 @@ public class JwtServiceImpl implements JwtService {
                 .map(a -> a.getAuthority())
                 .collect(Collectors.toList());
         claims.put("roles", roles);
-
         Date now = new Date();
         Date expiry = new Date(now.getTime() + jwtExpirationMs);
-
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
@@ -58,13 +59,12 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        String username = extractUsername(token);
+        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {
-        Date exp = extractAllClaims(token).getExpiration();
-        return exp.before(new Date());
+        return extractExpiration(token).before(new Date());
     }
 
     private Claims extractAllClaims(String token) {

@@ -1,3 +1,7 @@
+jwt:
+  secret: ${JWT_SECRET:GjJjslRBSZ7Gi+63ehMyu9avBB4cXVas8Jeew8NOu1E=}
+  expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/vertdrop_v2
@@ -12,14 +16,5 @@ spring:
       hibernate:
         format_sql: true
 
-    liquibase:
-      change-log: classpath:db/changelog/db.changelog-master.yaml
-
-
-  jwt:
-    secret: ${JWT_SECRET}
-    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
-
-
-
-
+liquibase:
+  change-log: classpath:db/changelog/db.changelog-master.yaml
