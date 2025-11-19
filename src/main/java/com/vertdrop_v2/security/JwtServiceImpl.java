@@ -9,18 +9,23 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class JwtServiceImpl implements JwtService {
 
     @Value("${jwt.secret}")
-    private String secret; // Doit être base64 (256 bits min)
+    private String secret; // Base64 encoded (32 bytes)
 
-    @Value("${jwt.expiration-ms:86400000}") // par défaut 24h
+    @Value("${jwt.expiration-ms:86400000}")
     private long jwtExpirationMs;
+
+    private SecretKey getSigningKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
 
     @Override
     public String extractUsername(String token) {
@@ -28,11 +33,16 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
+    public Date extractExpiration(String token) {
+        return extractAllClaims(token).getExpiration();
+    }
+
+    @Override
     public String generateToken(UserDetails userDetails) {
         Claims claims = Jwts.claims().setSubject(userDetails.getUsername());
-        // ajouter les rôles dans les claims
-        Collection<String> roles = userDetails.getAuthorities()
-                .stream().map(auth -> auth.getAuthority()).collect(Collectors.toList());
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(a -> a.getAuthority())
+                .collect(Collectors.toList());
         claims.put("roles", roles);
 
         Date now = new Date();
@@ -63,10 +73,5 @@ public class JwtServiceImpl implements JwtService {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-    }
-
-    private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
-        return Keys.hmacShaKeyFor(keyBytes);
     }
 }
