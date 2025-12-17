@@ -376,3 +376,57 @@ databaseChangeLog:
             referencedTableName: roles
             referencedColumnNames: id
             constraintName: fk_users_roles_role
+
+  - changeSet:
+      id: 10
+      author: houssam
+      changes:
+        # Add user_id column to client_expediteur table
+        - addColumn:
+            tableName: client_expediteur
+            columns:
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: true  # nullable for existing records
+
+        # Add user_id column to livreur table
+        - addColumn:
+            tableName: livreur
+            columns:
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: true  # nullable for existing records
+
+        # Add foreign key constraint for client_expediteur
+        - addForeignKeyConstraint:
+            baseTableName: client_expediteur
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_client_expediteur_user
+            onDelete: SET NULL  # If user is deleted, don't delete the client record
+
+        # Add foreign key constraint for livreur
+        - addForeignKeyConstraint:
+            baseTableName: livreur
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_livreur_user
+            onDelete: SET NULL
+
+        # Add unique constraint (one user can only be linked to one client)
+        - addUniqueConstraint:
+            tableName: client_expediteur
+            columnNames: user_id
+            constraintName: uk_client_expediteur_user
+
+        # Add unique constraint (one user can only be linked to one livreur)
+        - addUniqueConstraint:
+            tableName: livreur
+            columnNames: user_id
+            constraintName: uk_livreur_user
