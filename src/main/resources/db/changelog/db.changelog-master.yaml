@@ -430,3 +430,66 @@ databaseChangeLog:
             tableName: livreur
             columnNames: user_id
             constraintName: uk_livreur_user
+
+  - changeSet:
+      id: 12
+      author: houssam
+      changes:
+        # Create permissions table
+        - createTable:
+            tableName: permissions
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+
+        # Create roles_permissions join table
+        - createTable:
+            tableName: roles_permissions
+            columns:
+              - column:
+                  name: role_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: permission_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+        # Add primary key constraint
+        - addPrimaryKey:
+            tableName: roles_permissions
+            columnNames: role_id, permission_id
+            constraintName: pk_roles_permissions
+
+        # Add foreign key constraints
+        - addForeignKeyConstraint:
+            baseTableName: roles_permissions
+            baseColumnNames: role_id
+            referencedTableName: roles
+            referencedColumnNames: id
+            constraintName: fk_roles_permissions_role
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: roles_permissions
+            baseColumnNames: permission_id
+            referencedTableName: permissions
+            referencedColumnNames: id
+            constraintName: fk_roles_permissions_permission
+            onDelete: CASCADE
