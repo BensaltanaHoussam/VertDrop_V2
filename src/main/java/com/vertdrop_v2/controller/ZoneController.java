@@ -1,20 +1,21 @@
-package com.vertdrop_v2.controller;
+package com. vertdrop_v2.controller;
 
 import com.vertdrop_v2.dto.ZoneDTO;
-import com.vertdrop_v2.exception.NotFoundException;
+import com.vertdrop_v2.exception. NotFoundException;
 import com.vertdrop_v2.service.ZoneService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
+import jakarta. validation.Valid;
+import jakarta. validation.constraints.Positive;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost. PreAuthorize;
+import org.springframework.validation.annotation. Validated;
+import org.springframework. web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,6 +23,7 @@ import java.util.List;
 @RequestMapping("/api/zones")
 @Tag(name = "Zones", description = "Endpoints de gestion des zones")
 @Validated
+@PreAuthorize("hasRole('MANAGER')")
 public class ZoneController {
 
     private static final Logger log = LoggerFactory.getLogger(ZoneController.class);
@@ -32,7 +34,7 @@ public class ZoneController {
     }
 
     @GetMapping
-    @Operation(summary = "Lister les zones", description = "Retourne toutes les zones.")
+    @Operation(summary = "Lister les zones", description = "Retourne toutes les zones (MANAGER uniquement).")
     @ApiResponses(@ApiResponse(responseCode = "200", description = "Liste"))
     public ResponseEntity<List<ZoneDTO>> getAllZones() {
         log.info("GET /api/zones");

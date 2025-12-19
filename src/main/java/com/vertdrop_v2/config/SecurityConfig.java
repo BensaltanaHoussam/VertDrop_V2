@@ -72,8 +72,8 @@ public class SecurityConfig {
 
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:4200",  // Angular
-                "http://localhost:3000",  // React
-                "http://localhost:8080"   // Local backend testing
+                "http://localhost:3000",
+                "http://localhost:8080"
         ));
         configuration. setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
