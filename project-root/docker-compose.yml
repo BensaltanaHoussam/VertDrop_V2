@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image:  postgres:15-alpine
+    container_name: smartlogi-postgres
+    environment:
+      POSTGRES_DB: vertdrop_v2
+      POSTGRES_USER:  postgres
+      POSTGRES_PASSWORD: houssam
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - smartlogi-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout:  5s
+      retries:  5
+    restart: unless-stopped
+
+  # Spring Boot Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smartlogi-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Database connection
+      SPRING_DATASOURCE_URL:  jdbc:postgresql://postgres:5432/vertdrop_v2
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: houssam
+
+      # JPA/Hibernate
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_JPA_SHOW_SQL: "false"
+
+      # Liquibase
+      SPRING_LIQUIBASE_ENABLED: "true"
+
+      # JWT Configuration
+      JWT_SECRET: GjJjslRBSZ7Gi+63ehMyu9avBB4cXVas8Jeew8NOu1E=
+      JWT_EXPIRATION_MS: 86400000
+
+      # Logging
+      LOGGING_LEVEL_ROOT: INFO
+      LOGGING_LEVEL_COM_VERTDROP_V2: DEBUG
+
+    ports:
+      - "8080:8080"
+    networks:
+      - smartlogi-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  smartlogi-network:
+    driver: bridge
