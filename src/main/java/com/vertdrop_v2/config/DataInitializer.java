@@ -5,6 +5,7 @@ import com.vertdrop_v2.entity. User;
 import com.vertdrop_v2.repository.RoleRepository;
 import com.vertdrop_v2.repository. UserRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,7 @@ import java.util. Optional;
 import java.util.Set;
 
 @Component
+@Order(1)
 public class DataInitializer implements CommandLineRunner {
 
     private final RoleRepository roleRepository;
@@ -93,6 +95,7 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         System.out. println("🎉 DataInitializer completed successfully!\n");
+
     }
 
     private Role createRoleIfNotExists(String roleName) {

@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 import java.util. List;
 
 @Component
-@Order(2) // Run AFTER DataInitializer (Order 1)
+@Order(2)
 public class BusinessDataInitializer implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(BusinessDataInitializer.class);
