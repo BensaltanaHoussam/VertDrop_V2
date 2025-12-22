@@ -29,7 +29,7 @@ public class Colis {
     private BigDecimal poids;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 50)
+    @Column(nullable = false)
     private StatutColis statut;
 
     private Integer priorite;

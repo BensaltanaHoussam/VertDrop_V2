@@ -299,3 +299,197 @@ databaseChangeLog:
             referencedTableName: produit
             referencedColumnNames: id
             constraintName: fk_colisproduit_produit
+
+  - changeSet:
+      id: 9
+      author: houssam
+      changes:
+        # 1. Création de la table pour les rôles (ex: ROLE_MANAGER)
+        - createTable:
+            tableName: roles
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+
+        # 2. Création de la table pour les utilisateurs avec un ID de type UUID
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: username
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+
+        # 3. Création de la table de jointure pour la relation Many-to-Many
+        - createTable:
+            tableName: users_roles
+            columns:
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+        # 4. Ajout de la clé primaire sur la table de jointure
+        - addPrimaryKey:
+            tableName: users_roles
+            columnNames: user_id, role_id
+            constraintName: pk_users_roles
+
+        # 5. Ajout des contraintes de clé étrangère
+        - addForeignKeyConstraint:
+            baseTableName: users_roles
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_users_roles_user
+        - addForeignKeyConstraint:
+            baseTableName: users_roles
+            baseColumnNames: role_id
+            referencedTableName: roles
+            referencedColumnNames: id
+            constraintName: fk_users_roles_role
+
+  - changeSet:
+      id: 10
+      author: houssam
+      changes:
+        # Add user_id column to client_expediteur table
+        - addColumn:
+            tableName: client_expediteur
+            columns:
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: true  # nullable for existing records
+
+        # Add user_id column to livreur table
+        - addColumn:
+            tableName: livreur
+            columns:
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    nullable: true  # nullable for existing records
+
+        # Add foreign key constraint for client_expediteur
+        - addForeignKeyConstraint:
+            baseTableName: client_expediteur
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_client_expediteur_user
+            onDelete: SET NULL  # If user is deleted, don't delete the client record
+
+        # Add foreign key constraint for livreur
+        - addForeignKeyConstraint:
+            baseTableName: livreur
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_livreur_user
+            onDelete: SET NULL
+
+        # Add unique constraint (one user can only be linked to one client)
+        - addUniqueConstraint:
+            tableName: client_expediteur
+            columnNames: user_id
+            constraintName: uk_client_expediteur_user
+
+        # Add unique constraint (one user can only be linked to one livreur)
+        - addUniqueConstraint:
+            tableName: livreur
+            columnNames: user_id
+            constraintName: uk_livreur_user
+
+  - changeSet:
+      id: 12
+      author: houssam
+      changes:
+        # Create permissions table
+        - createTable:
+            tableName: permissions
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+
+        # Create roles_permissions join table
+        - createTable:
+            tableName: roles_permissions
+            columns:
+              - column:
+                  name: role_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: permission_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+
+        # Add primary key constraint
+        - addPrimaryKey:
+            tableName: roles_permissions
+            columnNames: role_id, permission_id
+            constraintName: pk_roles_permissions
+
+        # Add foreign key constraints
+        - addForeignKeyConstraint:
+            baseTableName: roles_permissions
+            baseColumnNames: role_id
+            referencedTableName: roles
+            referencedColumnNames: id
+            constraintName: fk_roles_permissions_role
+            onDelete: CASCADE
+
+        - addForeignKeyConstraint:
+            baseTableName: roles_permissions
+            baseColumnNames: permission_id
+            referencedTableName: permissions
+            referencedColumnNames: id
+            constraintName: fk_roles_permissions_permission
+            onDelete: CASCADE

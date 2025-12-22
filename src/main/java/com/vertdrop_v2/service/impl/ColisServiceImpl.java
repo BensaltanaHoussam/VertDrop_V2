@@ -180,9 +180,15 @@ public class ColisServiceImpl implements ColisService {
     @Override
     @Transactional(readOnly = true)
     public Page<ColisDTO> findAll(Pageable pageable, StatutColis statut, Long zoneId, String keyword) {
+
+        if (keyword == null) {
+            keyword = "";
+        }
+
         return colisRepository.findWithFilters(statut, zoneId, keyword, pageable)
                 .map(colisMapper::toDto);
     }
+
 
     @Override
     public void deleteById(Long id) {
@@ -239,7 +245,49 @@ public class ColisServiceImpl implements ColisService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ColisDTO> findAllForLivreur(
+            Long livreurId,
+            Pageable pageable,
+            StatutColis statut,
+            Long zoneId,
+            String keyword) {
 
+        if (keyword == null) {
+            keyword = "";
+        }
+
+        return colisRepository
+                .findWithFiltersAndLivreur(statut, zoneId, keyword, livreurId, pageable)
+                .map(colisMapper::toDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ColisDTO> findAllForClient(
+            Long clientId,
+            Pageable pageable,
+            StatutColis statut,
+            Long zoneId,
+            String keyword) {
+
+        if (keyword == null) {
+            keyword = "";
+        }
+
+        return colisRepository
+                .findWithFiltersAndClient(statut, zoneId, keyword, clientId, pageable)
+                .map(colisMapper::toDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ColisDTO> findByClientId(Long clientId) {
+        return colisRepository.findByClientExpediteurId(clientId).stream()
+                .map(colisMapper::toDto)
+                .collect(Collectors.toList());
+    }
 
 
 }

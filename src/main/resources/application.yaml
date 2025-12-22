@@ -1,20 +1,45 @@
+jwt:
+  secret: ${JWT_SECRET:GjJjslRBSZ7Gi+63ehMyu9avBB4cXVas8Jeew8NOu1E=}
+  expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+
 spring:
+  application:
+    name: SmartLogi-SDMS
+
   datasource:
-    url: jdbc:postgresql://localhost:5432/vertdrop_v2
-    username: postgres
-    password: houssam
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/vertdrop_v2}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:houssam}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+
   jpa:
     hibernate:
-      ddl-auto: validate
-    show-sql: true
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:validate}
+    show-sql: ${SPRING_JPA_SHOW_SQL:true}
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
-    liquibase:
-        change-log: classpath:db/changelog/db.changelog-master.yaml
+liquibase:
+  change-log: classpath:db/changelog/db.changelog-master.yaml
+  enabled: ${SPRING_LIQUIBASE_ENABLED:true}
 
+logging:
+  level:
+    root:
+      ${LOGGING_LEVEL_ROOT: INFO}
+    com.vertdrop_v2: ${LOGGING_LEVEL_COM_VERTDROP_V2:DEBUG}
 
-
-
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
