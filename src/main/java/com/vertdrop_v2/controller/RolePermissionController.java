@@ -42,7 +42,7 @@ public class RolePermissionController {
     public ResponseEntity<Void> removePermissionFromRole(
             @PathVariable Long roleId,
             @PathVariable Long permissionId) {
-        rolePermissionService. removePermissionFromRole(roleId, permissionId);
+        rolePermissionService.removePermissionFromRole(roleId, permissionId);
         return ResponseEntity.noContent().build();
     }
 }

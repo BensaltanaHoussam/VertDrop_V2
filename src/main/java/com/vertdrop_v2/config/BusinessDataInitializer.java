@@ -48,7 +48,6 @@ public class BusinessDataInitializer implements CommandLineRunner {
         if (colisRepository.count() > 0) {
             logger. info("ℹ️  Business data already exists. Skipping initialization.");
 
-            // BUT still check if linking is needed
             checkAndFixLinking();
             return;
         }

@@ -6,6 +6,9 @@ spring:
   application:
     name: SmartLogi-SDMS
 
+  config:
+    import: optional:file:project-root/.env[.properties]
+
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/vertdrop_v2}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
@@ -24,6 +27,15 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope: openid,profile,email
+
 
 liquibase:
   change-log: classpath:db/changelog/db.changelog-master.yaml
@@ -43,3 +55,5 @@ management:
   endpoint:
     health:
       show-details: always
+
+

@@ -36,6 +36,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
         roleRepository.save(role);
     }
 
+
     @Override
     public void removePermissionFromRole(Long roleId, Long permissionId) {
         Role role = roleRepository.findById(roleId)
