@@ -2,7 +2,7 @@ package com.vertdrop_v2.dto;
 
 import com.vertdrop_v2.entity.AuthProvider;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok. Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Set;
@@ -18,9 +18,13 @@ public class UserDTO {
     private String firstName;
     private String lastName;
     private AuthProvider provider;
+    private String providerId;
     private Set<String> roles;
     private Boolean enabled;
 
+    /**
+     * Get full name (firstName + lastName)
+     */
     public String getFullName() {
         if (firstName != null && lastName != null) {
             return firstName + " " + lastName;
@@ -32,6 +36,9 @@ public class UserDTO {
         return username;
     }
 
+    /**
+     * Check if OAuth2 user
+     */
     public boolean isOAuth2User() {
         return provider != null && provider != AuthProvider.LOCAL;
     }
