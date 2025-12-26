@@ -3,14 +3,13 @@ jwt:
   expiration-ms: ${JWT_EXPIRATION_MS:86400000}
 
 spring:
+  config:
+    import: optional:file:project-root/.env[.properties]
   application:
     name: VertDrop-SDMS
 
-  config:
-    import: optional:file:project-root/.env[.properties]
-
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/vertdrop_v2}
+    url:  ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/vertdrop_v2}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
     password: ${SPRING_DATASOURCE_PASSWORD:houssam}
     driver-class-name: org.postgresql.Driver
@@ -21,12 +20,13 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:validate}
-    show-sql: ${SPRING_JPA_SHOW_SQL:true}
+      ddl-auto:  none
+    show-sql: ${SPRING_JPA_SHOW_SQL:false}
     properties:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
   security:
     oauth2:
       client:
@@ -47,9 +47,10 @@ liquibase:
 
 logging:
   level:
-    root:
-      ${LOGGING_LEVEL_ROOT: INFO}
+    root: ${LOGGING_LEVEL_ROOT:INFO}
     com.vertdrop_v2: ${LOGGING_LEVEL_COM_VERTDROP_V2:DEBUG}
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
 
 management:
   endpoints:
@@ -59,5 +60,3 @@ management:
   endpoint:
     health:
       show-details: always
-
-
