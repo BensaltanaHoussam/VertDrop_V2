@@ -1,7 +1,7 @@
 package com.vertdrop_v2.security;
 
 import com.fasterxml.jackson.databind. ObjectMapper;
-import com.vertdrop_v2.entity. User;
+import com.vertdrop_v2.entity.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,9 +20,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(OAuth2SuccessHandler. class);
+    private static final Logger logger = LoggerFactory.getLogger(OAuth2SuccessHandler.class);
 
-    private final JwtUtil jwtUtil;
+    private final JwtService jwtService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -32,19 +32,26 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         User user = oAuth2User.getUser();
 
-        logger.info("✅ Generating JWT for OAuth2 user: {}", user. getEmail());
+        logger.info("✅ Generating JWT for OAuth2 user: {} (provider: {})", user.getEmail(), user.getProvider());
 
-        // Generate JWT token
-        String token = jwtUtil.generateToken(user.getUsername());
+        // Generate JWT token using JwtService
+        String token = jwtService.generateToken(user);
+
+        // Calculate expiration timestamp
+        long expiresAt = System.currentTimeMillis() + jwtService.getExpirationTime();
 
         // Create response
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("token", token);
         responseBody.put("tokenType", "Bearer");
-        responseBody.put("username", user.getUsername());
+        responseBody.put("username", user. getUsername());
         responseBody.put("email", user.getEmail());
+        responseBody.put("fullName", user.getFullName());
         responseBody.put("provider", user.getProvider().toString());
-        responseBody.put("expiresAt", System.currentTimeMillis() + jwtUtil.getExpirationTime());
+        responseBody.put("roles", user.getRoles().stream()
+                .map(role -> role.getName())
+                .toList());
+        responseBody.put("expiresAt", expiresAt);
 
         // Return JSON response
         response.setContentType("application/json");
@@ -54,6 +61,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         ObjectMapper objectMapper = new ObjectMapper();
         response.getWriter().write(objectMapper.writeValueAsString(responseBody));
 
-        logger.info("🔑 JWT token generated and returned for user: {}", user.getEmail());
+        logger.info("🔑 JWT token generated and returned for user: {} (email: {})", user.getUsername(), user.getEmail());
     }
 }

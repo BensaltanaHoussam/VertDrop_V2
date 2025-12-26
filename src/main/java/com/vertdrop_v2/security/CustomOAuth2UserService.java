@@ -39,7 +39,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
         AuthProvider provider = getAuthProvider(registrationId);
 
-        logger.info("🔐 OAuth2 login attempt with provider: {}", provider);
+        logger.info("OAuth2 login attempt with provider: {}", provider);
 
         // Process user data
         return processOAuth2User(userRequest, oAuth2User, provider);
@@ -54,17 +54,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String firstName = extractFirstName(attributes);
         String lastName = extractLastName(attributes);
 
-        logger.info("📧 Processing OAuth2 user: email={}, provider={}, providerId={}", email, provider, providerId);
+        logger.info("Processing OAuth2 user: email={}, provider={}, providerId={}", email, provider, providerId);
 
         if (email == null || email.isEmpty()) {
-            logger.error("❌ Email not found in OAuth2 attributes for provider: {}", provider);
+            logger.error("Email not found in OAuth2 attributes for provider: {}", provider);
             throw new OAuth2AuthenticationException("Email not found from OAuth2 provider");
         }
 
         // Find or create user
         User user = findOrCreateUser(email, providerId, provider, firstName, lastName);
 
-        logger.info("✅ OAuth2 user processed:  username={}, email={}, provider={}", user.getUsername(), user.getEmail(), user.getProvider());
+        logger.info("OAuth2 user processed:  username={}, email={}, provider={}", user.getUsername(), user.getEmail(), user.getProvider());
 
         // Return CustomOAuth2User with our User entity
         return new CustomOAuth2User(user, oAuth2User.getAttributes());
@@ -79,7 +79,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
             // Update user info if OAuth2 login
             if (existingUser.getProvider() == AuthProvider.LOCAL) {
-                logger.warn("⚠️ User {} exists with LOCAL provider, not updating to OAuth2", email);
+                logger.warn("User {} exists with LOCAL provider, not updating to OAuth2", email);
                 return existingUser;
             }
 
@@ -88,12 +88,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             existingUser.setFirstName(firstName);
             existingUser. setLastName(lastName);
 
-            logger.info("♻️ Updating existing OAuth2 user: {}", email);
+            logger.info("Updating existing OAuth2 user: {}", email);
             return userRepository.save(existingUser);
         }
 
         // Create new user
-        logger.info("➕ Creating new OAuth2 user: {}", email);
+        logger.info("Creating new OAuth2 user: {}", email);
         return createNewOAuth2User(email, providerId, provider, firstName, lastName);
     }
 
@@ -117,7 +117,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         newUser.setRoles(roles);
 
         User savedUser = userRepository.save(newUser);
-        logger.info("✅ Created new OAuth2 user: {} with role ROLE_CLIENT", savedUser.getEmail());
+        logger.info("Created new OAuth2 user: {} with role ROLE_CLIENT", savedUser.getEmail());
 
         return savedUser;
     }
