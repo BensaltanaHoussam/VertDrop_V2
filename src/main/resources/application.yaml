@@ -9,7 +9,7 @@ spring:
     name: VertDrop-SDMS
 
   datasource:
-    url:  ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/vertdrop_v2}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/vertdrop_v2}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
     password: ${SPRING_DATASOURCE_PASSWORD:houssam}
     driver-class-name: org.postgresql.Driver
@@ -20,12 +20,13 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto:  none
+      ddl-auto: none
     show-sql: ${SPRING_JPA_SHOW_SQL:false}
     properties:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
 
   security:
     oauth2:
@@ -41,6 +42,31 @@ spring:
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             client-name: Google
 
+          facebook:
+            client-id: ${FACEBOOK_APP_ID}
+            client-secret: ${FACEBOOK_APP_SECRET}
+            scope:
+              - email
+              - public_profile
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            client-name: Facebook
+
+          # 👇 ADD THIS BLOCK FOR OKTA/AUTH0
+          okta:
+            client-id: ${OKTA_CLIENT_ID}
+            client-secret: ${OKTA_CLIENT_SECRET}
+            scope:
+              - openid
+              - profile
+              - email
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            client-name: Okta
+
+        provider:
+          # 👇 REQUIRED: Tell Spring where to verify Okta tokens
+          okta:
+            issuer-uri: ${OKTA_ISSUER_URI}
+            user-name-attribute: sub
 liquibase:
   change-log: classpath:db/changelog/db.changelog-master.yaml
   enabled: ${SPRING_LIQUIBASE_ENABLED:true}
