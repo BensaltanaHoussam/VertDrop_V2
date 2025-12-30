@@ -125,6 +125,13 @@
         </dependency>
 
 
+        <!-- Spring Security OAuth2 Client (for Google, Facebook login) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+        </dependency>
+
+<!---->
     </dependencies>
 
     <build>

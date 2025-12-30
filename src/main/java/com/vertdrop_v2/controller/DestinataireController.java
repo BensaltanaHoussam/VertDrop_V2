@@ -33,6 +33,7 @@ public class DestinataireController {
         this.destinataireService = destinataireService;
     }
 
+
     @GetMapping
     @Operation(summary = "Lister les destinataires", description = "Retourne tous les destinataires.")
     @ApiResponses(@ApiResponse(responseCode = "200", description = "Liste"))

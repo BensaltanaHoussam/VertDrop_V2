@@ -493,3 +493,76 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_roles_permissions_permission
             onDelete: CASCADE
+  # ChangeSet 13: Add OAuth2 support to users table
+  - changeSet:
+      id: 13
+      author: BensaltanaHoussam
+      changes:
+        # Add email column
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: email
+                  type: VARCHAR(150)
+                  constraints:
+                    unique: true
+
+        # Add first_name column
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: first_name
+                  type: VARCHAR(100)
+
+        # Add last_name column
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: last_name
+                  type: VARCHAR(100)
+
+        # Add provider column (defaults to LOCAL)
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: provider
+                  type: VARCHAR(20)
+                  defaultValue: LOCAL
+                  constraints:
+                    nullable: false
+
+        # Add provider_id column
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: provider_id
+                  type: VARCHAR(255)
+
+        # Make password nullable (OAuth2 users don't have passwords)
+        - dropNotNullConstraint:
+            tableName: users
+            columnName: password
+            columnDataType: VARCHAR(255)
+
+        # Add index on email for faster lookups
+        - createIndex:
+            tableName: users
+            indexName: idx_users_email
+            columns:
+              - column:
+                  name: email
+
+        # Add index on provider_id for faster OAuth2 user lookups
+        - createIndex:
+            tableName: users
+            indexName: idx_users_provider_id
+            columns:
+              - column:
+                  name: provider
+              - column:
+                  name: provider_id
