@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        // Set any needed env vars (ex: JAVA_HOME, MAVEN_HOME, etc.)
-    }
-
     tools {
         maven 'Maven_3.9'
         jdk 'jdk17'
@@ -13,34 +9,38 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git credentialsId: 'github-token', url: 'https://github.com/BensaltanaHoussam/VertDrop_V2.git', branch: 'main'
+                checkout scm
             }
         }
+
         stage('Build') {
             steps {
                 sh './mvnw clean package -DskipTests'
             }
         }
+
         stage('Test') {
             steps {
                 sh './mvnw test'
             }
         }
+
         stage('Build Docker Image') {
-            when {
-                branch 'main'
-            }
             steps {
-                sh 'docker build -t vertdrop-app:ci .'
+                sh 'docker build -t vertdrop-app:${BUILD_NUMBER} .'
+                sh 'docker build -t vertdrop-app:latest .'
             }
         }
     }
 
     post {
+        success {
+            echo '✅ Build successful!'
+        }
         failure {
-            echo 'Build failed!'
+            echo '❌ Build failed!'
             mail to: 'bensaltanahoussam7@gmail.com',
-                 subject: "Jenkins Build Failed: ${env.JOB_NAME} ${env.BUILD_NUMBER}",
+                 subject: "Jenkins Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                  body: "Check Jenkins for details: ${env.BUILD_URL}"
         }
     }
