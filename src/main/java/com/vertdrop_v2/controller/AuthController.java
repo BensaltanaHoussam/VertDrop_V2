@@ -67,6 +67,7 @@ public class AuthController {
         } catch (BadCredentialsException ex) {
             logger.warn("❌ Invalid credentials for user: {}", request.getUsername());
 
+
             Map<String, String> error = new HashMap<>();
             error. put("error", "Unauthorized");
             error.put("message", "Invalid username or password");
