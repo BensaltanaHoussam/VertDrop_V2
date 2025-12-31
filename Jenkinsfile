@@ -11,7 +11,6 @@ pipeline {
             JAVA_HOME = "${tool 'jdk17'}"
             PATH = "${JAVA_HOME}/bin:${env.PATH}"
     }
-
     stages {
         stage('Checkout') {
             steps {
