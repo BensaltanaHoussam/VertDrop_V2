@@ -12,7 +12,7 @@ La société cliente souhaite remplacer une gestion manuelle (Excel / papier) pa
 - Suivre le cycle complet d’un colis (création → collecte → transit → livraison).
 - Fournir historique complet pour chaque colis (traçabilité).
 - Recherche, filtrage et pagination performants pour de larges jeux de données.
-- Validation côté serveur, gestion centralisée des erreurs et journalisation   .
+- Validation côté serveur, gestion centralisée des erreurs et journalisation       .
 
 ## Utilisateurs
 - Gestionnaire logistique
