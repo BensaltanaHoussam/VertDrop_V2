@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LivreurController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VertDrop_V2</a> &gt; <a href="index.source.html" class="el_package">com.vertdrop_v2.controller</a> &gt; <span class="el_source">LivreurController.java</span></div><h1>LivreurController.java</h1><pre class="source lang-java linenums">package com.vertdrop_v2.controller;
+
+import com.vertdrop_v2.dto.ColisDTO;
+import com.vertdrop_v2.dto. LivreurDTO;
+import com.vertdrop_v2.exception.NotFoundException;
+import com.vertdrop_v2.service.AuthService;
+import com.vertdrop_v2.service.ColisService;
+import com.vertdrop_v2.service. LivreurService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses. ApiResponses;
+import io. swagger.v3.oas. annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints. Positive;
+import org.slf4j.Logger;
+import org. slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access. prepost.PreAuthorize;
+import org.springframework.validation. annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping(&quot;/api/livreurs&quot;)
+@Tag(name = &quot;Livreurs&quot;, description = &quot;Endpoints de gestion des livreurs&quot;)
+@Validated
+public class LivreurController {
+
+<span class="fc" id="L31">    private static final Logger log = LoggerFactory.getLogger(LivreurController.class);</span>
+    private final LivreurService livreurService;
+    private final ColisService colisService;
+    private final AuthService authService;
+
+<span class="fc" id="L36">    public LivreurController(LivreurService livreurService, ColisService colisService, AuthService authService) {</span>
+<span class="fc" id="L37">        this.livreurService = livreurService;</span>
+<span class="fc" id="L38">        this.colisService = colisService;</span>
+<span class="fc" id="L39">        this. authService = authService;</span>
+<span class="fc" id="L40">    }</span>
+
+    @GetMapping
+    @PreAuthorize(&quot;hasRole('MANAGER')&quot;)
+    @Operation(summary = &quot;Lister les livreurs&quot;, description = &quot;Retourne tous les livreurs (MANAGER uniquement).&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Liste&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Accès refusé&quot;)
+    })
+    public ResponseEntity&lt;List&lt;LivreurDTO&gt;&gt; getAllLivreurs() {
+<span class="nc" id="L50">        log.info(&quot;GET /api/livreurs&quot;);</span>
+<span class="nc" id="L51">        return ResponseEntity.ok(livreurService.findAll());</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    @PreAuthorize(&quot;hasAnyRole('MANAGER', 'LIVREUR')&quot;)
+    @Operation(summary = &quot;Récupérer un livreur&quot;, description = &quot;Retourne un livreur par identifiant.&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Trouvé&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Introuvable&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Accès refusé&quot;)
+    })
+    public ResponseEntity&lt;LivreurDTO&gt; getLivreurById(@PathVariable @Positive Long id) {
+<span class="nc" id="L63">        log.info(&quot;GET /api/livreurs/{}&quot;, id);</span>
+
+        // Livreur can only see himself
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        if (authService.hasRole(&quot;ROLE_LIVREUR&quot;)) {</span>
+<span class="nc" id="L67">            Long currentLivreurId = authService.getCurrentLivreur()</span>
+<span class="nc" id="L68">                    .orElseThrow(() -&gt; new RuntimeException(&quot;Livreur not found&quot;))</span>
+<span class="nc" id="L69">                    .getId();</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">            if (!id.equals(currentLivreurId)) {</span>
+<span class="nc" id="L71">                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();</span>
+            }
+        }
+
+<span class="nc" id="L75">        LivreurDTO dto = livreurService.findById(id)</span>
+<span class="nc" id="L76">                .orElseThrow(() -&gt; new NotFoundException(&quot;Livreur introuvable id=&quot; + id));</span>
+<span class="nc" id="L77">        return ResponseEntity.ok(dto);</span>
+    }
+
+    @PostMapping
+    @PreAuthorize(&quot;hasRole('MANAGER')&quot;)
+    @Operation(summary = &quot;Créer un livreur&quot;, description = &quot;Crée un nouveau livreur (MANAGER uniquement).&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;201&quot;, description = &quot;Créé&quot;),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Données invalides&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Accès refusé&quot;)
+    })
+    public ResponseEntity&lt;LivreurDTO&gt; createLivreur(@Valid @RequestBody LivreurDTO livreurDTO) {
+<span class="nc" id="L89">        log.info(&quot;POST /api/livreurs&quot;);</span>
+<span class="nc" id="L90">        return new ResponseEntity&lt;&gt;(livreurService.save(livreurDTO), HttpStatus.CREATED);</span>
+    }
+
+    @PutMapping(&quot;/{id}&quot;)
+    @PreAuthorize(&quot;hasAnyRole('MANAGER', 'LIVREUR')&quot;)
+    @Operation(summary = &quot;Mettre à jour un livreur&quot;, description = &quot;Met à jour un livreur existant.&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Mis à jour&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Introuvable&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Accès refusé&quot;)
+    })
+    public ResponseEntity&lt;LivreurDTO&gt; updateLivreur(
+            @PathVariable @Positive Long id,
+            @Valid @RequestBody LivreurDTO livreurDTO) {
+
+        // Livreur can only update himself
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        if (authService.hasRole(&quot;ROLE_LIVREUR&quot;)) {</span>
+<span class="nc" id="L107">            Long currentLivreurId = authService.getCurrentLivreur()</span>
+<span class="nc" id="L108">                    .orElseThrow(() -&gt; new RuntimeException(&quot;Livreur not found&quot;))</span>
+<span class="nc" id="L109">                    .getId();</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">            if (!id.equals(currentLivreurId)) {</span>
+<span class="nc" id="L111">                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();</span>
+            }
+        }
+
+<span class="nc" id="L115">        livreurService.findById(id)</span>
+<span class="nc" id="L116">                .orElseThrow(() -&gt; new NotFoundException(&quot;Livreur introuvable id=&quot; + id));</span>
+<span class="nc" id="L117">        livreurDTO.setId(id);</span>
+<span class="nc" id="L118">        log.info(&quot;PUT /api/livreurs/{}&quot;, id);</span>
+<span class="nc" id="L119">        return ResponseEntity.ok(livreurService.save(livreurDTO));</span>
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    @PreAuthorize(&quot;hasRole('MANAGER')&quot;)
+    @Operation(summary = &quot;Supprimer un livreur&quot;, description = &quot;Supprime un livreur (MANAGER uniquement).&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;204&quot;, description = &quot;Supprimé&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Introuvable&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Accès refusé&quot;)
+    })
+    public ResponseEntity&lt;Void&gt; deleteLivreur(@PathVariable @Positive Long id) {
+<span class="nc" id="L131">        livreurService.findById(id)</span>
+<span class="nc" id="L132">                .orElseThrow(() -&gt; new NotFoundException(&quot;Livreur introuvable id=&quot; + id));</span>
+<span class="nc" id="L133">        log.info(&quot;DELETE /api/livreurs/{}&quot;, id);</span>
+<span class="nc" id="L134">        livreurService.deleteById(id);</span>
+<span class="nc" id="L135">        return ResponseEntity. noContent().build();</span>
+    }
+
+    @GetMapping(&quot;/{id}/colis&quot;)
+    @PreAuthorize(&quot;hasAnyRole('MANAGER', 'LIVREUR')&quot;)
+    @Operation(summary = &quot;Lister colis d'un livreur&quot;, description = &quot;Retourne les colis assignés à un livreur.&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Liste&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Livreur introuvable&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Accès refusé&quot;)
+    })
+    public ResponseEntity&lt;List&lt;ColisDTO&gt;&gt; getColisForLivreur(@PathVariable @Positive Long id) {
+        // Livreur can only see his own colis
+<span class="nc bnc" id="L148" title="All 2 branches missed.">        if (authService.hasRole(&quot;ROLE_LIVREUR&quot;)) {</span>
+<span class="nc" id="L149">            Long currentLivreurId = authService.getCurrentLivreur()</span>
+<span class="nc" id="L150">                    .orElseThrow(() -&gt; new RuntimeException(&quot;Livreur not found&quot;))</span>
+<span class="nc" id="L151">                    .getId();</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">            if (!id.equals(currentLivreurId)) {</span>
+<span class="nc" id="L153">                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();</span>
+            }
+        }
+
+<span class="nc" id="L157">        livreurService.findById(id)</span>
+<span class="nc" id="L158">                .orElseThrow(() -&gt; new NotFoundException(&quot;Livreur introuvable id=&quot; + id));</span>
+<span class="nc" id="L159">        log.info(&quot;GET /api/livreurs/{}/colis&quot;, id);</span>
+<span class="nc" id="L160">        return ResponseEntity.ok(colisService.findByLivreurId(id));</span>
+    }
+
+
+
+
+    @GetMapping(&quot;/me&quot;)
+    @PreAuthorize(&quot;hasRole('LIVREUR')&quot;)
+    @Operation(summary = &quot;Mon profil&quot;, description = &quot;Retourne le profil du livreur connecté.&quot;)
+    @ApiResponses(@ApiResponse(responseCode = &quot;200&quot;, description = &quot;Profil récupéré&quot;))
+    public ResponseEntity&lt;LivreurDTO&gt; getMyProfile() {
+<span class="nc" id="L171">        log.info(&quot;GET /api/livreurs/me&quot;);</span>
+<span class="nc" id="L172">        LivreurDTO livreur = authService.getCurrentLivreur()</span>
+<span class="nc" id="L173">                .map(l -&gt; livreurService.findById(l.getId()).orElseThrow())</span>
+<span class="nc" id="L174">                .orElseThrow(() -&gt; new RuntimeException(&quot;Livreur not found for current user&quot;));</span>
+<span class="nc" id="L175">        return ResponseEntity.ok(livreur);</span>
+    }
+
+
+
+    @GetMapping(&quot;/me/colis&quot;)
+    @PreAuthorize(&quot;hasRole('LIVREUR')&quot;)
+    @Operation(summary = &quot;Mes colis&quot;, description = &quot;Retourne les colis assignés au livreur connecté.&quot;)
+    @ApiResponses(@ApiResponse(responseCode = &quot;200&quot;, description = &quot;Liste des colis&quot;))
+    public ResponseEntity&lt;List&lt;ColisDTO&gt;&gt; getMesColis() {
+<span class="nc" id="L185">        log.info(&quot;GET /api/livreurs/me/colis&quot;);</span>
+<span class="nc" id="L186">        Long livreurId = authService.getCurrentLivreur()</span>
+<span class="nc" id="L187">                .orElseThrow(() -&gt; new RuntimeException(&quot;Livreur not found&quot;))</span>
+<span class="nc" id="L188">                .getId();</span>
+<span class="nc" id="L189">        return ResponseEntity.ok(colisService.findByLivreurId(livreurId));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

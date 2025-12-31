@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RolePermissionServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VertDrop_V2</a> &gt; <a href="index.source.html" class="el_package">com.vertdrop_v2.service.impl</a> &gt; <span class="el_source">RolePermissionServiceImpl.java</span></div><h1>RolePermissionServiceImpl.java</h1><pre class="source lang-java linenums">package com.vertdrop_v2.service.impl;
+
+import com.vertdrop_v2.dto.PermissionDTO;
+import com.vertdrop_v2.dto.RoleWithPermissionsDTO;
+import com.vertdrop_v2.entity.Permission;
+import com. vertdrop_v2.entity.Role;
+import com.vertdrop_v2.repository. PermissionRepository;
+import com.vertdrop_v2.repository.RoleRepository;
+import com.vertdrop_v2.service.RolePermissionService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util. Set;
+import java.util.stream. Collectors;
+
+@Service
+@Transactional
+public class RolePermissionServiceImpl implements RolePermissionService {
+
+    private final RoleRepository roleRepository;
+    private final PermissionRepository permissionRepository;
+
+<span class="fc" id="L23">    public RolePermissionServiceImpl(RoleRepository roleRepository, PermissionRepository permissionRepository) {</span>
+<span class="fc" id="L24">        this.roleRepository = roleRepository;</span>
+<span class="fc" id="L25">        this. permissionRepository = permissionRepository;</span>
+<span class="fc" id="L26">    }</span>
+
+    @Override
+    public void assignPermissionToRole(Long roleId, Long permissionId) {
+<span class="nc" id="L30">        Role role = roleRepository.findById(roleId)</span>
+<span class="nc" id="L31">                .orElseThrow(() -&gt; new RuntimeException(&quot;Role not found:  &quot; + roleId));</span>
+<span class="nc" id="L32">        Permission permission = permissionRepository.findById(permissionId)</span>
+<span class="nc" id="L33">                .orElseThrow(() -&gt; new RuntimeException(&quot;Permission not found: &quot; + permissionId));</span>
+
+<span class="nc" id="L35">        role.getPermissions().add(permission);</span>
+<span class="nc" id="L36">        roleRepository.save(role);</span>
+<span class="nc" id="L37">    }</span>
+
+
+    @Override
+    public void removePermissionFromRole(Long roleId, Long permissionId) {
+<span class="nc" id="L42">        Role role = roleRepository.findById(roleId)</span>
+<span class="nc" id="L43">                .orElseThrow(() -&gt; new RuntimeException(&quot;Role not found: &quot; + roleId));</span>
+<span class="nc" id="L44">        Permission permission = permissionRepository.findById(permissionId)</span>
+<span class="nc" id="L45">                .orElseThrow(() -&gt; new RuntimeException(&quot;Permission not found: &quot; + permissionId));</span>
+
+<span class="nc" id="L47">        role.getPermissions().remove(permission);</span>
+<span class="nc" id="L48">        roleRepository.save(role);</span>
+<span class="nc" id="L49">    }</span>
+
+    @Override
+    @Transactional(readOnly = true)
+    public Set&lt;PermissionDTO&gt; getPermissionsByRoleId(Long roleId) {
+<span class="nc" id="L54">        Role role = roleRepository.findById(roleId)</span>
+<span class="nc" id="L55">                .orElseThrow(() -&gt; new RuntimeException(&quot;Role not found: &quot; + roleId));</span>
+
+<span class="nc" id="L57">        return role.getPermissions().stream()</span>
+<span class="nc" id="L58">                .map(p -&gt; new PermissionDTO(p.getId(), p.getName(), p.getDescription()))</span>
+<span class="nc" id="L59">                .collect(Collectors.toSet());</span>
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RoleWithPermissionsDTO getRoleWithPermissions(Long roleId) {
+<span class="nc" id="L65">        Role role = roleRepository.findById(roleId)</span>
+<span class="nc" id="L66">                .orElseThrow(() -&gt; new RuntimeException(&quot;Role not found: &quot; + roleId));</span>
+
+<span class="nc" id="L68">        Set&lt;PermissionDTO&gt; permissions = role. getPermissions().stream()</span>
+<span class="nc" id="L69">                .map(p -&gt; new PermissionDTO(p.getId(), p.getName(), p.getDescription()))</span>
+<span class="nc" id="L70">                .collect(Collectors. toSet());</span>
+
+<span class="nc" id="L72">        return new RoleWithPermissionsDTO(role.getId(), role.getName(), permissions);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

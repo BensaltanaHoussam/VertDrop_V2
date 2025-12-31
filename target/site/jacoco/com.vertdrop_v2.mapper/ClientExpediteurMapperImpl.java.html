@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClientExpediteurMapperImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VertDrop_V2</a> &gt; <a href="index.source.html" class="el_package">com.vertdrop_v2.mapper</a> &gt; <span class="el_source">ClientExpediteurMapperImpl.java</span></div><h1>ClientExpediteurMapperImpl.java</h1><pre class="source lang-java linenums">package com.vertdrop_v2.mapper;
+
+import com.vertdrop_v2.dto.ClientExpediteurDTO;
+import com.vertdrop_v2.entity.ClientExpediteur;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,
+    date = &quot;2025-12-31T16:51:20+0100&quot;,
+    comments = &quot;version: 1.5.5.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)&quot;
+)
+@Component
+<span class="fc" id="L14">public class ClientExpediteurMapperImpl implements ClientExpediteurMapper {</span>
+
+    @Override
+    public ClientExpediteurDTO toDto(ClientExpediteur entity) {
+<span class="nc bnc" id="L18" title="All 2 branches missed.">        if ( entity == null ) {</span>
+<span class="nc" id="L19">            return null;</span>
+        }
+
+<span class="nc" id="L22">        ClientExpediteurDTO clientExpediteurDTO = new ClientExpediteurDTO();</span>
+
+<span class="nc" id="L24">        clientExpediteurDTO.setId( entity.getId() );</span>
+<span class="nc" id="L25">        clientExpediteurDTO.setNom( entity.getNom() );</span>
+<span class="nc" id="L26">        clientExpediteurDTO.setPrenom( entity.getPrenom() );</span>
+<span class="nc" id="L27">        clientExpediteurDTO.setEmail( entity.getEmail() );</span>
+<span class="nc" id="L28">        clientExpediteurDTO.setTelephone( entity.getTelephone() );</span>
+<span class="nc" id="L29">        clientExpediteurDTO.setAdresse( entity.getAdresse() );</span>
+
+<span class="nc" id="L31">        return clientExpediteurDTO;</span>
+    }
+
+    @Override
+    public ClientExpediteur toEntity(ClientExpediteurDTO dto) {
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        if ( dto == null ) {</span>
+<span class="nc" id="L37">            return null;</span>
+        }
+
+<span class="nc" id="L40">        ClientExpediteur clientExpediteur = new ClientExpediteur();</span>
+
+<span class="nc" id="L42">        clientExpediteur.setId( dto.getId() );</span>
+<span class="nc" id="L43">        clientExpediteur.setNom( dto.getNom() );</span>
+<span class="nc" id="L44">        clientExpediteur.setPrenom( dto.getPrenom() );</span>
+<span class="nc" id="L45">        clientExpediteur.setEmail( dto.getEmail() );</span>
+<span class="nc" id="L46">        clientExpediteur.setTelephone( dto.getTelephone() );</span>
+<span class="nc" id="L47">        clientExpediteur.setAdresse( dto.getAdresse() );</span>
+
+<span class="nc" id="L49">        return clientExpediteur;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

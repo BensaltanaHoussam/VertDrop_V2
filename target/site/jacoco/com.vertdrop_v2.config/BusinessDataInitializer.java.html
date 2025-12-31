@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BusinessDataInitializer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VertDrop_V2</a> &gt; <a href="index.source.html" class="el_package">com.vertdrop_v2.config</a> &gt; <span class="el_source">BusinessDataInitializer.java</span></div><h1>BusinessDataInitializer.java</h1><pre class="source lang-java linenums">package com.vertdrop_v2.config;
+
+import com.vertdrop_v2.entity.*;
+import com.vertdrop_v2.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util. List;
+
+@Component
+@Order(2)
+public class BusinessDataInitializer implements CommandLineRunner {
+
+<span class="fc" id="L19">    private static final Logger logger = LoggerFactory.getLogger(BusinessDataInitializer.class);</span>
+
+    private final ColisRepository colisRepository;
+    private final ClientExpediteurRepository clientExpediteurRepository;
+    private final DestinataireRepository destinataireRepository;
+    private final ZoneRepository zoneRepository;
+    private final LivreurRepository livreurRepository;
+    private final UserRepository userRepository;
+
+    public BusinessDataInitializer(
+            ColisRepository colisRepository,
+            ClientExpediteurRepository clientExpediteurRepository,
+            DestinataireRepository destinataireRepository,
+            ZoneRepository zoneRepository,
+            LivreurRepository livreurRepository,
+<span class="fc" id="L34">            UserRepository userRepository) {</span>
+<span class="fc" id="L35">        this.colisRepository = colisRepository;</span>
+<span class="fc" id="L36">        this.clientExpediteurRepository = clientExpediteurRepository;</span>
+<span class="fc" id="L37">        this.destinataireRepository = destinataireRepository;</span>
+<span class="fc" id="L38">        this.zoneRepository = zoneRepository;</span>
+<span class="fc" id="L39">        this.livreurRepository = livreurRepository;</span>
+<span class="fc" id="L40">        this.userRepository = userRepository;</span>
+<span class="fc" id="L41">    }</span>
+
+    @Override
+    @Transactional
+    public void run(String... args) throws Exception {
+<span class="fc" id="L46">        logger. info(&quot;🚚 --- Starting Business Data Initialization ---&quot;);</span>
+
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        if (colisRepository.count() &gt; 0) {</span>
+<span class="fc" id="L49">            logger. info(&quot;ℹ️  Business data already exists. Skipping initialization.&quot;);</span>
+
+<span class="fc" id="L51">            checkAndFixLinking();</span>
+<span class="fc" id="L52">            return;</span>
+        }
+
+<span class="nc" id="L55">        logger.info(&quot;📦 Creating business entities...&quot;);</span>
+
+        // Create Zone
+<span class="nc" id="L58">        Zone zone = new Zone();</span>
+<span class="nc" id="L59">        zone.setNom(&quot;Centre Ville&quot;);</span>
+<span class="nc" id="L60">        zone.setCodePostal(&quot;20000&quot;);</span>
+<span class="nc" id="L61">        zoneRepository.save(zone);</span>
+<span class="nc" id="L62">        logger.info(&quot;✅ Zone created: {}&quot;, zone.getNom());</span>
+
+        // Get users (they should exist from DataInitializer Order 1)
+<span class="nc" id="L65">        User clientUser = userRepository.findByUsername(&quot;client1&quot;)</span>
+<span class="nc" id="L66">                .orElseThrow(() -&gt; new RuntimeException(&quot;❌ User 'client1' not found!  DataInitializer must run first! &quot;));</span>
+<span class="nc" id="L67">        User livreurUser = userRepository.findByUsername(&quot;livreur1&quot;)</span>
+<span class="nc" id="L68">                .orElseThrow(() -&gt; new RuntimeException(&quot;❌ User 'livreur1' not found! DataInitializer must run first!&quot;));</span>
+
+<span class="nc" id="L70">        logger.info(&quot;✅ Found client1 user: ID = {}&quot;, clientUser.getId());</span>
+<span class="nc" id="L71">        logger.info(&quot;✅ Found livreur1 user: ID = {}&quot;, livreurUser.getId());</span>
+
+        // Create ClientExpediteur LINKED to client1
+<span class="nc" id="L74">        ClientExpediteur sender = new ClientExpediteur();</span>
+<span class="nc" id="L75">        sender.setNom(&quot;Bensaltana&quot;);</span>
+<span class="nc" id="L76">        sender.setPrenom(&quot;Houssam&quot;);</span>
+<span class="nc" id="L77">        sender.setEmail(&quot;houssam.bensaltana@example.com&quot;);</span>
+<span class="nc" id="L78">        sender.setTelephone(&quot;+212 6 12 34 56 78&quot;);</span>
+<span class="nc" id="L79">        sender.setAdresse(&quot;123 Rue Mohammed V, Casablanca&quot;);</span>
+<span class="nc" id="L80">        sender.setUser(clientUser);  // ← LINK HERE</span>
+<span class="nc" id="L81">        clientExpediteurRepository.save(sender);</span>
+<span class="nc" id="L82">        logger.info(&quot;✅ ClientExpediteur created: {} {} (linked to user: {})&quot;,</span>
+<span class="nc" id="L83">                sender.getPrenom(), sender.getNom(), clientUser.getUsername());</span>
+
+        // Create Livreur LINKED to livreur1
+<span class="nc" id="L86">        Livreur livreur = new Livreur();</span>
+<span class="nc" id="L87">        livreur.setNom(&quot;Alami&quot;);</span>
+<span class="nc" id="L88">        livreur.setPrenom(&quot;Youssef&quot;);</span>
+<span class="nc" id="L89">        livreur.setTelephone(&quot;+212 6 98 76 54 32&quot;);</span>
+<span class="nc" id="L90">        livreur.setVehicule(&quot;Moto Yamaha 125&quot;);</span>
+<span class="nc" id="L91">        livreur.setZoneAssignee(zone);</span>
+<span class="nc" id="L92">        livreur.setUser(livreurUser);  // ← LINK HERE</span>
+<span class="nc" id="L93">        livreurRepository.save(livreur);</span>
+<span class="nc" id="L94">        logger.info(&quot;✅ Livreur created:  {} {} (linked to user: {})&quot;,</span>
+<span class="nc" id="L95">                livreur.getPrenom(), livreur.getNom(), livreurUser.getUsername());</span>
+
+        // Create Destinataire
+<span class="nc" id="L98">        Destinataire recipient = new Destinataire();</span>
+<span class="nc" id="L99">        recipient.setNom(&quot;Test&quot;);</span>
+<span class="nc" id="L100">        recipient.setPrenom(&quot;User&quot;);</span>
+<span class="nc" id="L101">        recipient.setEmail(&quot;test. user@example.com&quot;);</span>
+<span class="nc" id="L102">        recipient.setTelephone(&quot;+212 6 11 22 33 44&quot;);</span>
+<span class="nc" id="L103">        recipient.setAdresse(&quot;456 Avenue Hassan II, Rabat&quot;);</span>
+<span class="nc" id="L104">        destinataireRepository.save(recipient);</span>
+<span class="nc" id="L105">        logger.info(&quot;✅ Destinataire created: {} {}&quot;, recipient.getPrenom(), recipient.getNom());</span>
+
+        // Create Colis assigned to the livreur
+<span class="nc" id="L108">        logger.info(&quot;📦 Creating test Colis...&quot;);</span>
+<span class="nc" id="L109">        Colis newColis = new Colis();</span>
+<span class="nc" id="L110">        newColis.setDescription(&quot;Un colis de test contenant des livres&quot;);</span>
+<span class="nc" id="L111">        newColis.setPoids(new BigDecimal(&quot;1.5&quot;));</span>
+<span class="nc" id="L112">        newColis.setStatut(StatutColis.CREE);</span>
+<span class="nc" id="L113">        newColis.setPriorite(1);</span>
+<span class="nc" id="L114">        newColis.setClientExpediteur(sender);</span>
+<span class="nc" id="L115">        newColis.setDestinataire(recipient);</span>
+<span class="nc" id="L116">        newColis.setZone(zone);</span>
+<span class="nc" id="L117">        newColis.setLivreur(livreur);</span>
+<span class="nc" id="L118">        newColis.setVilleDestination(&quot;Casablanca&quot;);</span>
+
+<span class="nc" id="L120">        Colis savedColis = colisRepository.save(newColis);</span>
+<span class="nc" id="L121">        logger.info(&quot;✅ Colis saved with ID: {} (assigned to livreur: {})&quot;,</span>
+<span class="nc" id="L122">                savedColis.getId(), livreur.getPrenom());</span>
+
+        // Verify linking
+<span class="nc" id="L125">        verifyLinking();</span>
+
+<span class="nc" id="L127">        logger.info(&quot;🎉 --- Business Data Initialization Finished ---&quot;);</span>
+<span class="nc" id="L128">    }</span>
+
+    private void checkAndFixLinking() {
+<span class="fc" id="L131">        logger.info(&quot;🔍 Checking user-entity linking...&quot;);</span>
+
+<span class="fc" id="L133">        User clientUser = userRepository.findByUsername(&quot;client1&quot;).orElse(null);</span>
+<span class="fc" id="L134">        User livreurUser = userRepository.findByUsername(&quot;livreur1&quot;).orElse(null);</span>
+
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">        if (clientUser != null) {</span>
+<span class="fc" id="L137">            ClientExpediteur client = clientExpediteurRepository. findByUser(clientUser).orElse(null);</span>
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">            if (client == null) {</span>
+<span class="nc" id="L139">                logger.warn(&quot;⚠️ client1 user exists but not linked to ClientExpediteur!&quot;);</span>
+                // Try to find by email and link
+<span class="nc" id="L141">                ClientExpediteur existing = clientExpediteurRepository</span>
+<span class="nc" id="L142">                        .findAll().stream()</span>
+<span class="nc" id="L143">                        .filter(c -&gt; &quot;houssam.bensaltana@example.com&quot;.equals(c.getEmail()))</span>
+<span class="nc" id="L144">                        . findFirst()</span>
+<span class="nc" id="L145">                        .orElse(null);</span>
+<span class="nc bnc" id="L146" title="All 4 branches missed.">                if (existing != null &amp;&amp; existing.getUser() == null) {</span>
+<span class="nc" id="L147">                    existing.setUser(clientUser);</span>
+<span class="nc" id="L148">                    clientExpediteurRepository.save(existing);</span>
+<span class="nc" id="L149">                    logger.info(&quot;✅ Linked existing ClientExpediteur to client1 user&quot;);</span>
+                }
+            }
+        }
+
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">        if (livreurUser != null) {</span>
+<span class="fc" id="L155">            Livreur livreur = livreurRepository.findByUser(livreurUser).orElse(null);</span>
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">            if (livreur == null) {</span>
+<span class="nc" id="L157">                logger.warn(&quot;⚠️ livreur1 user exists but not linked to Livreur!&quot;);</span>
+                // Try to find by name and link
+<span class="nc" id="L159">                Livreur existing = livreurRepository</span>
+<span class="nc" id="L160">                        .findAll().stream()</span>
+<span class="nc bnc" id="L161" title="All 4 branches missed.">                        .filter(l -&gt; &quot;Alami&quot;.equals(l.getNom()) &amp;&amp; &quot;Youssef&quot;.equals(l.getPrenom()))</span>
+<span class="nc" id="L162">                        .findFirst()</span>
+<span class="nc" id="L163">                        .orElse(null);</span>
+<span class="nc bnc" id="L164" title="All 4 branches missed.">                if (existing != null &amp;&amp; existing.getUser() == null) {</span>
+<span class="nc" id="L165">                    existing.setUser(livreurUser);</span>
+<span class="nc" id="L166">                    livreurRepository.save(existing);</span>
+<span class="nc" id="L167">                    logger.info(&quot;✅ Linked existing Livreur to livreur1 user&quot;);</span>
+                }
+            }
+        }
+<span class="fc" id="L171">    }</span>
+
+    private void verifyLinking() {
+<span class="nc" id="L174">        logger.info(&quot;🔍 Verifying user-entity linking...&quot;);</span>
+
+<span class="nc" id="L176">        User clientUser = userRepository.findByUsername(&quot;client1&quot;).orElse(null);</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">        if (clientUser != null) {</span>
+<span class="nc" id="L178">            ClientExpediteur client = clientExpediteurRepository.findByUser(clientUser).orElse(null);</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">            if (client != null) {</span>
+<span class="nc" id="L180">                logger.info(&quot;✅ client1 → ClientExpediteur: {} {} (ID: {})&quot;,</span>
+<span class="nc" id="L181">                        client.getPrenom(), client.getNom(), client.getId());</span>
+            } else {
+<span class="nc" id="L183">                logger. error(&quot;❌ client1 user NOT linked to any ClientExpediteur!&quot;);</span>
+            }
+        }
+
+<span class="nc" id="L187">        User livreurUser = userRepository.findByUsername(&quot;livreur1&quot;).orElse(null);</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">        if (livreurUser != null) {</span>
+<span class="nc" id="L189">            Livreur livreur = livreurRepository.findByUser(livreurUser).orElse(null);</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">            if (livreur != null) {</span>
+<span class="nc" id="L191">                logger.info(&quot;✅ livreur1 → Livreur: {} {} (ID:  {})&quot;,</span>
+<span class="nc" id="L192">                        livreur.getPrenom(), livreur.getNom(), livreur.getId());</span>
+            } else {
+<span class="nc" id="L194">                logger.error(&quot;❌ livreur1 user NOT linked to any Livreur!&quot;);</span>
+            }
+        }
+<span class="nc" id="L197">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

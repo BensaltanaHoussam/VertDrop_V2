@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.vertdrop_v2.service.impl.PermissionServiceImplTest
+-------------------------------------------------------------------------------
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.405 s -- in com.vertdrop_v2.service.impl.PermissionServiceImplTest

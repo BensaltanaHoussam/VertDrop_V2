@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ColisController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VertDrop_V2</a> &gt; <a href="index.source.html" class="el_package">com.vertdrop_v2.controller</a> &gt; <span class="el_source">ColisController.java</span></div><h1>ColisController.java</h1><pre class="source lang-java linenums">package com.vertdrop_v2.controller;
+
+import com.vertdrop_v2.dto.ColisCreateRequestDTO;
+import com.vertdrop_v2.dto.ColisDTO;
+import com.vertdrop_v2.dto. HistoriqueLivraisonDTO;
+import com.vertdrop_v2.dto.UpdateStatusRequestDTO;
+import com.vertdrop_v2.entity.StatutColis;
+import com. vertdrop_v2.exception. NotFoundException;
+import com.vertdrop_v2.service.AuthService;
+import com.vertdrop_v2.service.ColisService;
+import com.vertdrop_v2.service. LivreurService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger. v3.oas.annotations. responses.ApiResponse;
+import io.swagger. v3.oas.annotations. Parameter;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints. Positive;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain. Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind. annotation.*;
+
+import java.util. List;
+
+@RestController
+@RequestMapping(&quot;/api/colis&quot;)
+@Tag(name = &quot;Colis&quot;, description = &quot;Endpoints de gestion des colis&quot;)
+@Validated
+public class ColisController {
+
+<span class="fc" id="L37">    private static final Logger log = LoggerFactory.getLogger(ColisController.class);</span>
+    private final LivreurService livreurService;
+    private final ColisService colisService;
+    private final AuthService authService;
+
+<span class="fc" id="L42">    public ColisController(LivreurService livreurService, ColisService colisService, AuthService authService) {</span>
+<span class="fc" id="L43">        this.colisService = colisService;</span>
+<span class="fc" id="L44">        this.livreurService = livreurService;</span>
+<span class="fc" id="L45">        this.authService = authService;</span>
+<span class="fc" id="L46">    }</span>
+
+    /**
+     * GET /api/colis - Filtered by role
+     * MANAGER: sees all
+     * LIVREUR: sees only his colis
+     * CLIENT: sees only his colis
+     */
+    @GetMapping
+    @PreAuthorize(&quot;hasAnyRole('MANAGER', 'LIVREUR', 'CLIENT')&quot;)
+    @Operation(summary = &quot;Lister les colis&quot;, description = &quot;Recherche paginée des colis avec filtres statut, zone, mot clé.&quot;)
+    @ApiResponses(@ApiResponse(responseCode = &quot;200&quot;, description = &quot;Page de colis&quot;))
+    public ResponseEntity&lt;Page&lt;ColisDTO&gt;&gt; getAllColis(
+            @Parameter(hidden = true) Pageable pageable,
+            @RequestParam(required = false) StatutColis statut,
+            @RequestParam(required = false) @Positive Long zoneId,
+            @RequestParam(required = false) String keyword) {
+<span class="nc" id="L63">        log.info(&quot;GET /api/colis statut={}, zoneId={}, keyword={}&quot;, statut, zoneId, keyword);</span>
+
+        // Filter by role
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        if (authService.hasRole(&quot;ROLE_MANAGER&quot;)) {</span>
+            // Manager sees everything
+<span class="nc" id="L68">            return ResponseEntity.ok(colisService.findAll(pageable, statut, zoneId, keyword));</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        } else if (authService.hasRole(&quot;ROLE_LIVREUR&quot;)) {</span>
+            // Livreur sees only his colis
+<span class="nc" id="L71">            Long livreurId = authService. getCurrentLivreur()</span>
+<span class="nc" id="L72">                    .orElseThrow(() -&gt; new RuntimeException(&quot;Livreur not found for current user&quot;))</span>
+<span class="nc" id="L73">                    .getId();</span>
+<span class="nc" id="L74">            return ResponseEntity.ok(colisService.findAllForLivreur(livreurId, pageable, statut, zoneId, keyword));</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        } else if (authService.hasRole(&quot;ROLE_CLIENT&quot;)) {</span>
+            // Client sees only his colis
+<span class="nc" id="L77">            Long clientId = authService.getCurrentClient()</span>
+<span class="nc" id="L78">                    .orElseThrow(() -&gt; new RuntimeException(&quot;Client not found for current user&quot;))</span>
+<span class="nc" id="L79">                    .getId();</span>
+<span class="nc" id="L80">            return ResponseEntity.ok(colisService. findAllForClient(clientId, pageable, statut, zoneId, keyword));</span>
+        }
+
+<span class="nc" id="L83">        return ResponseEntity. status(HttpStatus.FORBIDDEN).build();</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    @PreAuthorize(&quot;hasAnyRole('MANAGER', 'LIVREUR', 'CLIENT')&quot;)
+    @Operation(summary = &quot;Récupérer un colis&quot;, description = &quot;Retourne un colis par son identifiant.&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Colis trouvé&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Colis introuvable&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Accès refusé&quot;)
+    })
+    public ResponseEntity&lt;ColisDTO&gt; getColisById(@PathVariable @Positive Long id) {
+<span class="nc" id="L95">        log.info(&quot;GET /api/colis/{}&quot;, id);</span>
+<span class="nc" id="L96">        ColisDTO dto = colisService.findById(id)</span>
+<span class="nc" id="L97">                .orElseThrow(() -&gt; new NotFoundException(&quot;Colis introuvable id=&quot; + id));</span>
+
+        // Check access rights
+<span class="nc bnc" id="L100" title="All 2 branches missed.">        if (authService.hasRole(&quot;ROLE_MANAGER&quot;)) {</span>
+<span class="nc" id="L101">            return ResponseEntity.ok(dto);</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        } else if (authService. hasRole(&quot;ROLE_LIVREUR&quot;)) {</span>
+<span class="nc" id="L103">            Long livreurId = authService.getCurrentLivreur()</span>
+<span class="nc" id="L104">                    .orElseThrow(() -&gt; new RuntimeException(&quot;Livreur not found&quot;))</span>
+<span class="nc" id="L105">                    .getId();</span>
+<span class="nc bnc" id="L106" title="All 4 branches missed.">            if (dto.getLivreur() != null &amp;&amp; dto.getLivreur().getId().equals(livreurId)) {</span>
+<span class="nc" id="L107">                return ResponseEntity.ok(dto);</span>
+            }
+<span class="nc" id="L109">            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">        } else if (authService.hasRole(&quot;ROLE_CLIENT&quot;)) {</span>
+<span class="nc" id="L111">            Long clientId = authService.getCurrentClient()</span>
+<span class="nc" id="L112">                    . orElseThrow(() -&gt; new RuntimeException(&quot;Client not found&quot;))</span>
+<span class="nc" id="L113">                    .getId();</span>
+<span class="nc bnc" id="L114" title="All 4 branches missed.">            if (dto.getClientExpediteur() != null &amp;&amp; dto.getClientExpediteur().getId().equals(clientId)) {</span>
+<span class="nc" id="L115">                return ResponseEntity.ok(dto);</span>
+            }
+<span class="nc" id="L117">            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();</span>
+        }
+
+<span class="nc" id="L120">        return ResponseEntity. status(HttpStatus.FORBIDDEN).build();</span>
+    }
+
+    @PostMapping
+    @PreAuthorize(&quot;hasAnyRole('MANAGER', 'CLIENT')&quot;)
+    @Operation(summary = &quot;Créer un colis&quot;, description = &quot;Crée un colis (références par ID).&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;201&quot;, description = &quot;Colis créé&quot;),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;Données invalides&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Accès refusé&quot;)
+    })
+    public ResponseEntity&lt;ColisDTO&gt; createColis(@Valid @RequestBody ColisCreateRequestDTO req) {
+<span class="nc" id="L132">        log.info(&quot;POST /api/colis (request DTO)&quot;);</span>
+
+        // If client is creating, force it to be HIS colis
+<span class="nc bnc" id="L135" title="All 2 branches missed.">        if (authService.hasRole(&quot;ROLE_CLIENT&quot;)) {</span>
+<span class="nc" id="L136">            Long clientId = authService.getCurrentClient()</span>
+<span class="nc" id="L137">                    .orElseThrow(() -&gt; new RuntimeException(&quot;Client not found&quot;))</span>
+<span class="nc" id="L138">                    .getId();</span>
+<span class="nc" id="L139">            req.setClientExpediteurId(clientId); // Force client to be the current user</span>
+        }
+
+<span class="nc" id="L142">        ColisDTO dto = colisService.createFromRequest(req);</span>
+<span class="nc" id="L143">        return new ResponseEntity&lt;&gt;(dto, HttpStatus.CREATED);</span>
+    }
+
+    @PutMapping(&quot;/{id}&quot;)
+    @PreAuthorize(&quot;hasAnyRole('MANAGER', 'CLIENT')&quot;)
+    @Operation(summary = &quot;Mettre à jour un colis&quot;, description = &quot;Met à jour un colis existant.&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Colis mis à jour&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Colis introuvable&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Accès refusé&quot;)
+    })
+    public ResponseEntity&lt;ColisDTO&gt; updateColis(
+            @PathVariable @Positive Long id,
+            @Valid @RequestBody ColisDTO colisDTO) {
+
+<span class="nc" id="L158">        ColisDTO existing = colisService.findById(id)</span>
+<span class="nc" id="L159">                .orElseThrow(() -&gt; new NotFoundException(&quot;Colis introuvable id=&quot; + id));</span>
+
+        // Check access
+<span class="nc bnc" id="L162" title="All 2 branches missed.">        if (authService.hasRole(&quot;ROLE_CLIENT&quot;)) {</span>
+<span class="nc" id="L163">            Long clientId = authService.getCurrentClient()</span>
+<span class="nc" id="L164">                    .orElseThrow(() -&gt; new RuntimeException(&quot;Client not found&quot;))</span>
+<span class="nc" id="L165">                    .getId();</span>
+<span class="nc bnc" id="L166" title="All 4 branches missed.">            if (existing.getClientExpediteur() == null || !existing.getClientExpediteur().getId().equals(clientId)) {</span>
+<span class="nc" id="L167">                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();</span>
+            }
+        }
+
+<span class="nc" id="L171">        colisDTO.setId(id);</span>
+<span class="nc" id="L172">        log.info(&quot;PUT /api/colis/{}&quot;, id);</span>
+<span class="nc" id="L173">        return ResponseEntity.ok(colisService.save(colisDTO));</span>
+    }
+
+    @DeleteMapping(&quot;/{id}&quot;)
+    @PreAuthorize(&quot;hasRole('MANAGER')&quot;)
+    @Operation(summary = &quot;Supprimer un colis&quot;, description = &quot;Supprime un colis (MANAGER uniquement).&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;204&quot;, description = &quot;Supprimé&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Colis introuvable&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Accès refusé&quot;)
+    })
+    public ResponseEntity&lt;Void&gt; deleteColis(@PathVariable @Positive Long id) {
+<span class="nc" id="L185">        colisService.findById(id)</span>
+<span class="nc" id="L186">                .orElseThrow(() -&gt; new NotFoundException(&quot;Colis introuvable id=&quot; + id));</span>
+<span class="nc" id="L187">        log.info(&quot;DELETE /api/colis/{}&quot;, id);</span>
+<span class="nc" id="L188">        colisService.deleteById(id);</span>
+<span class="nc" id="L189">        return ResponseEntity.noContent().build();</span>
+    }
+
+    @PutMapping(&quot;/{id}/status&quot;)
+    @PreAuthorize(&quot;hasAnyRole('MANAGER', 'LIVREUR')&quot;)
+    @Operation(summary = &quot;Changer le statut&quot;, description = &quot;Met à jour le statut d'un colis.&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Statut mis à jour&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Colis introuvable&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Accès refusé&quot;)
+    })
+    public ResponseEntity&lt;ColisDTO&gt; updateColisStatus(
+            @PathVariable @Positive Long id,
+            @Valid @RequestBody UpdateStatusRequestDTO statusRequest) {
+<span class="nc" id="L203">        log.info(&quot;PUT /api/colis/{}/status -&gt; {}&quot;, id, statusRequest.getStatut());</span>
+
+        // Check if livreur can update this colis
+<span class="nc bnc" id="L206" title="All 2 branches missed.">        if (authService.hasRole(&quot;ROLE_LIVREUR&quot;)) {</span>
+<span class="nc" id="L207">            ColisDTO colis = colisService.findById(id)</span>
+<span class="nc" id="L208">                    .orElseThrow(() -&gt; new NotFoundException(&quot;Colis introuvable id=&quot; + id));</span>
+<span class="nc" id="L209">            Long livreurId = authService. getCurrentLivreur()</span>
+<span class="nc" id="L210">                    .orElseThrow(() -&gt; new RuntimeException(&quot;Livreur not found&quot;))</span>
+<span class="nc" id="L211">                    . getId();</span>
+<span class="nc bnc" id="L212" title="All 4 branches missed.">            if (colis.getLivreur() == null || !colis.getLivreur().getId().equals(livreurId)) {</span>
+<span class="nc" id="L213">                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();</span>
+            }
+        }
+
+<span class="nc" id="L217">        return ResponseEntity.ok(colisService.updateStatus(id, StatutColis.valueOf(statusRequest.getStatut().toUpperCase()), statusRequest.getCommentaire()));</span>
+    }
+
+    @GetMapping(&quot;/{id}/colis&quot;)
+    @PreAuthorize(&quot;hasRole('MANAGER')&quot;)
+    @Operation(summary = &quot;Lister colis d'un livreur&quot;, description = &quot;Retourne les colis affectés à un livreur.&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Liste des colis&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Livreur introuvable&quot;)
+    })
+    public ResponseEntity&lt;List&lt;ColisDTO&gt;&gt; getColisForLivreur(@PathVariable @Positive Long id) {
+<span class="nc" id="L228">        livreurService.findById(id)</span>
+<span class="nc" id="L229">                .orElseThrow(() -&gt; new NotFoundException(&quot;Livreur introuvable id=&quot; + id));</span>
+<span class="nc" id="L230">        log.info(&quot;GET /api/colis/{}/colis&quot;, id);</span>
+<span class="nc" id="L231">        return ResponseEntity.ok(colisService.findByLivreurId(id));</span>
+    }
+
+    @PutMapping(&quot;/{colisId}/assign-livreur/{livreurId}&quot;)
+    @PreAuthorize(&quot;hasRole('MANAGER')&quot;)
+    @Operation(summary = &quot;Assigner un livreur&quot;, description = &quot;Assigne un livreur à un colis (MANAGER uniquement).&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Colis mis à jour&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Colis ou livreur introuvable&quot;)
+    })
+    public ResponseEntity&lt;ColisDTO&gt; assignLivreurToColis(
+            @PathVariable(&quot;colisId&quot;) @Positive Long colisId,
+            @PathVariable(&quot;livreurId&quot;) @Positive Long livreurId) {
+<span class="nc" id="L244">        log.info(&quot;PUT /api/colis/{}/assign-livreur/{}&quot;, colisId, livreurId);</span>
+<span class="nc" id="L245">        return ResponseEntity.ok(colisService.assignLivreur(colisId, livreurId));</span>
+    }
+
+    @GetMapping(&quot;/{id}/history&quot;)
+    @PreAuthorize(&quot;hasAnyRole('MANAGER', 'LIVREUR', 'CLIENT')&quot;)
+    @Operation(summary = &quot;Historique du colis&quot;, description = &quot;Retourne l'historique des livraisons pour un colis.&quot;)
+    @ApiResponses({
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Historique&quot;),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;Colis introuvable&quot;),
+            @ApiResponse(responseCode = &quot;403&quot;, description = &quot;Accès refusé&quot;)
+    })
+    public ResponseEntity&lt;List&lt;HistoriqueLivraisonDTO&gt;&gt; getColisHistory(@PathVariable @Positive Long id) {
+<span class="nc" id="L257">        ColisDTO colis = colisService.findById(id)</span>
+<span class="nc" id="L258">                .orElseThrow(() -&gt; new NotFoundException(&quot;Colis introuvable id=&quot; + id));</span>
+
+        // Check access
+<span class="nc bnc" id="L261" title="All 2 branches missed.">        if (authService.hasRole(&quot;ROLE_LIVREUR&quot;)) {</span>
+<span class="nc" id="L262">            Long livreurId = authService.getCurrentLivreur()</span>
+<span class="nc" id="L263">                    .orElseThrow(() -&gt; new RuntimeException(&quot;Livreur not found&quot;))</span>
+<span class="nc" id="L264">                    .getId();</span>
+<span class="nc bnc" id="L265" title="All 4 branches missed.">            if (colis.getLivreur() == null || !colis.getLivreur().getId().equals(livreurId)) {</span>
+<span class="nc" id="L266">                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();</span>
+            }
+<span class="nc bnc" id="L268" title="All 2 branches missed.">        } else if (authService.hasRole(&quot;ROLE_CLIENT&quot;)) {</span>
+<span class="nc" id="L269">            Long clientId = authService. getCurrentClient()</span>
+<span class="nc" id="L270">                    .orElseThrow(() -&gt; new RuntimeException(&quot;Client not found&quot;))</span>
+<span class="nc" id="L271">                    .getId();</span>
+<span class="nc bnc" id="L272" title="All 4 branches missed.">            if (colis.getClientExpediteur() == null || !colis.getClientExpediteur().getId().equals(clientId)) {</span>
+<span class="nc" id="L273">                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();</span>
+            }
+        }
+
+<span class="nc" id="L277">        log.info(&quot;GET /api/colis/{}/history&quot;, id);</span>
+<span class="nc" id="L278">        return ResponseEntity.ok(colisService.findHistoryForColis(id));</span>
+    }
+
+
+    @GetMapping(&quot;/mes-colis&quot;)
+    @PreAuthorize(&quot;hasAnyRole('LIVREUR', 'CLIENT')&quot;)
+    @Operation(summary = &quot;Mes colis&quot;, description = &quot;Retourne les colis de l'utilisateur connecté.&quot;)
+    @ApiResponses(@ApiResponse(responseCode = &quot;200&quot;, description = &quot;Liste des colis&quot;))
+    public ResponseEntity&lt;List&lt;ColisDTO&gt;&gt; getMesColis() {
+<span class="nc" id="L287">        log.info(&quot;GET /api/colis/mes-colis&quot;);</span>
+
+<span class="nc bnc" id="L289" title="All 2 branches missed.">        if (authService.hasRole(&quot;ROLE_LIVREUR&quot;)) {</span>
+<span class="nc" id="L290">            Long livreurId = authService.getCurrentLivreur()</span>
+<span class="nc" id="L291">                    .orElseThrow(() -&gt; new RuntimeException(&quot;Livreur not found&quot;))</span>
+<span class="nc" id="L292">                    .getId();</span>
+<span class="nc" id="L293">            return ResponseEntity.ok(colisService.findByLivreurId(livreurId));</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">        } else if (authService.hasRole(&quot;ROLE_CLIENT&quot;)) {</span>
+<span class="nc" id="L295">            Long clientId = authService.getCurrentClient()</span>
+<span class="nc" id="L296">                    . orElseThrow(() -&gt; new RuntimeException(&quot;Client not found&quot;))</span>
+<span class="nc" id="L297">                    .getId();</span>
+<span class="nc" id="L298">            return ResponseEntity.ok(colisService.findByClientId(clientId));</span>
+        }
+
+<span class="nc" id="L301">        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

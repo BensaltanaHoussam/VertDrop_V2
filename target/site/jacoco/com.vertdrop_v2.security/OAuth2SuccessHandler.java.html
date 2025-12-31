@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OAuth2SuccessHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VertDrop_V2</a> &gt; <a href="index.source.html" class="el_package">com.vertdrop_v2.security</a> &gt; <span class="el_source">OAuth2SuccessHandler.java</span></div><h1>OAuth2SuccessHandler.java</h1><pre class="source lang-java linenums">package com.vertdrop_v2.security;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vertdrop_v2.entity.AuthProvider;
+import com.vertdrop_v2.entity.Role;
+import com.vertdrop_v2.entity.User;
+import com.vertdrop_v2.repository.RoleRepository;
+import com.vertdrop_v2.repository.UserRepository;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+@Component
+@RequiredArgsConstructor
+public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
+
+<span class="fc" id="L32">    private static final Logger logger = LoggerFactory.getLogger(OAuth2SuccessHandler.class);</span>
+
+    private final JwtService jwtService;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+
+    @Override
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+<span class="nc" id="L40">        logger.info(&quot;🎉 OAuth2 authentication successful!&quot;);</span>
+
+        // 1. Extract OAuth2 User details
+<span class="nc" id="L43">        OAuth2AuthenticationToken authToken = (OAuth2AuthenticationToken) authentication;</span>
+<span class="nc" id="L44">        OAuth2User oAuth2User = authToken.getPrincipal();</span>
+<span class="nc" id="L45">        String registrationId = authToken.getAuthorizedClientRegistrationId(); // &quot;google&quot;, &quot;facebook&quot;</span>
+
+        // 2. Extract user info
+<span class="nc" id="L48">        Map&lt;String, Object&gt; attributes = oAuth2User.getAttributes();</span>
+<span class="nc" id="L49">        String email = (String) attributes.get(&quot;email&quot;);</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        String providerId = attributes.get(&quot;sub&quot;) != null ? attributes.get(&quot;sub&quot;).toString() : attributes.get(&quot;id&quot;).toString();</span>
+
+        // Extract names carefully
+<span class="nc" id="L53">        String firstName = null;</span>
+<span class="nc" id="L54">        String lastName = null;</span>
+
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        if (attributes.get(&quot;given_name&quot;) != null) {</span>
+<span class="nc" id="L57">            firstName = (String) attributes.get(&quot;given_name&quot;);</span>
+<span class="nc" id="L58">            lastName = (String) attributes.get(&quot;family_name&quot;);</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        } else if (attributes.get(&quot;name&quot;) != null) {</span>
+<span class="nc" id="L60">            String name = (String) attributes.get(&quot;name&quot;);</span>
+<span class="nc" id="L61">            String[] parts = name.split(&quot; &quot;);</span>
+<span class="nc" id="L62">            firstName = parts[0];</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">            if (parts.length &gt; 1) lastName = parts[parts.length - 1];</span>
+        }
+
+<span class="nc" id="L66">        logger.info(&quot;👤 Processing user: {} (Provider: {})&quot;, email, registrationId);</span>
+
+        // 3. Sync with Database (Find or Create)
+<span class="nc" id="L69">        User user = syncUserInDatabase(email, providerId, registrationId, firstName, lastName);</span>
+
+        // 4. Generate JWT
+<span class="nc" id="L72">        logger.info(&quot;✅ Generating JWT for user: {}&quot;, user.getEmail());</span>
+<span class="nc" id="L73">        String token = jwtService.generateToken(user);</span>
+<span class="nc" id="L74">        long expiresAt = System.currentTimeMillis() + jwtService.getExpirationTime();</span>
+
+        // 5. Build Response
+<span class="nc" id="L77">        Map&lt;String, Object&gt; responseBody = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L78">        responseBody.put(&quot;token&quot;, token);</span>
+<span class="nc" id="L79">        responseBody.put(&quot;tokenType&quot;, &quot;Bearer&quot;);</span>
+<span class="nc" id="L80">        responseBody.put(&quot;username&quot;, user.getUsername());</span>
+<span class="nc" id="L81">        responseBody.put(&quot;email&quot;, user.getEmail());</span>
+<span class="nc" id="L82">        responseBody.put(&quot;fullName&quot;, user.getFullName());</span>
+<span class="nc" id="L83">        responseBody.put(&quot;provider&quot;, user.getProvider().toString());</span>
+<span class="nc" id="L84">        responseBody.put(&quot;roles&quot;, user.getRoles().stream().map(Role::getName).toList());</span>
+<span class="nc" id="L85">        responseBody.put(&quot;expiresAt&quot;, expiresAt);</span>
+
+        // 6. Send JSON Response
+<span class="nc" id="L88">        response.setContentType(&quot;application/json&quot;);</span>
+<span class="nc" id="L89">        response.setCharacterEncoding(&quot;UTF-8&quot;);</span>
+<span class="nc" id="L90">        response.setStatus(HttpServletResponse.SC_OK);</span>
+<span class="nc" id="L91">        new ObjectMapper().writeValue(response.getWriter(), responseBody);</span>
+<span class="nc" id="L92">    }</span>
+
+    private User syncUserInDatabase(String email, String providerId, String registrationId, String firstName, String lastName) {
+<span class="nc" id="L95">        Optional&lt;User&gt; existingUser = userRepository.findByEmail(email);</span>
+
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        if (existingUser.isPresent()) {</span>
+            // Update existing user
+<span class="nc" id="L99">            User user = existingUser.get();</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">            if (user.getProvider() != AuthProvider.LOCAL) {</span>
+<span class="nc" id="L101">                user.setFirstName(firstName);</span>
+<span class="nc" id="L102">                user.setLastName(lastName);</span>
+<span class="nc" id="L103">                user.setProviderId(providerId);</span>
+<span class="nc" id="L104">                return userRepository.save(user);</span>
+            }
+<span class="nc" id="L106">            return user;</span>
+        } else {
+            // Create new user
+<span class="nc" id="L109">            User newUser = new User();</span>
+<span class="nc" id="L110">            newUser.setUsername(email);</span>
+<span class="nc" id="L111">            newUser.setEmail(email);</span>
+<span class="nc" id="L112">            newUser.setFirstName(firstName);</span>
+<span class="nc" id="L113">            newUser.setLastName(lastName);</span>
+<span class="nc" id="L114">            newUser.setProviderId(providerId);</span>
+<span class="nc" id="L115">            newUser.setProvider(AuthProvider.valueOf(registrationId.toUpperCase()));</span>
+<span class="nc" id="L116">            newUser.setEnabled(true);</span>
+
+            // Assign default role
+<span class="nc" id="L119">            Role clientRole = roleRepository.findByName(&quot;ROLE_CLIENT&quot;)</span>
+<span class="nc" id="L120">                    .orElseGet(() -&gt; {</span>
+<span class="nc" id="L121">                        Role r = new Role();</span>
+<span class="nc" id="L122">                        r.setName(&quot;ROLE_CLIENT&quot;);</span>
+<span class="nc" id="L123">                        return roleRepository.save(r);</span>
+                    });
+
+<span class="nc" id="L126">            Set&lt;Role&gt; roles = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L127">            roles.add(clientRole);</span>
+<span class="nc" id="L128">            newUser.setRoles(roles);</span>
+
+<span class="nc" id="L130">            return userRepository.save(newUser);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

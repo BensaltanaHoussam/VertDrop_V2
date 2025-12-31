@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RolePermissionController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">VertDrop_V2</a> &gt; <a href="index.source.html" class="el_package">com.vertdrop_v2.controller</a> &gt; <span class="el_source">RolePermissionController.java</span></div><h1>RolePermissionController.java</h1><pre class="source lang-java linenums">package com.vertdrop_v2.controller;
+
+import com.vertdrop_v2.dto. PermissionDTO;
+import com.vertdrop_v2.dto.RoleWithPermissionsDTO;
+import com.vertdrop_v2.service.RolePermissionService;
+import org.springframework.http.ResponseEntity;
+import org.springframework. security.access.prepost.PreAuthorize;
+import org. springframework.web.bind.annotation.*;
+
+import java.util.Set;
+
+@RestController
+@RequestMapping(&quot;/api/admin/roles&quot;)
+@PreAuthorize(&quot;hasRole('MANAGER')&quot;)
+public class RolePermissionController {
+
+    private final RolePermissionService rolePermissionService;
+
+<span class="fc" id="L19">    public RolePermissionController(RolePermissionService rolePermissionService) {</span>
+<span class="fc" id="L20">        this.rolePermissionService = rolePermissionService;</span>
+<span class="fc" id="L21">    }</span>
+
+    @GetMapping(&quot;/{roleId}/permissions&quot;)
+    public ResponseEntity&lt;Set&lt;PermissionDTO&gt;&gt; getRolePermissions(@PathVariable Long roleId) {
+<span class="nc" id="L25">        return ResponseEntity.ok(rolePermissionService. getPermissionsByRoleId(roleId));</span>
+    }
+
+    @GetMapping(&quot;/{roleId}&quot;)
+    public ResponseEntity&lt;RoleWithPermissionsDTO&gt; getRoleWithPermissions(@PathVariable Long roleId) {
+<span class="nc" id="L30">        return ResponseEntity.ok(rolePermissionService.getRoleWithPermissions(roleId));</span>
+    }
+
+    @PostMapping(&quot;/{roleId}/permissions/{permissionId}&quot;)
+    public ResponseEntity&lt;Void&gt; assignPermissionToRole(
+            @PathVariable Long roleId,
+            @PathVariable Long permissionId) {
+<span class="nc" id="L37">        rolePermissionService.assignPermissionToRole(roleId, permissionId);</span>
+<span class="nc" id="L38">        return ResponseEntity.ok().build();</span>
+    }
+
+    @DeleteMapping(&quot;/{roleId}/permissions/{permissionId}&quot;)
+    public ResponseEntity&lt;Void&gt; removePermissionFromRole(
+            @PathVariable Long roleId,
+            @PathVariable Long permissionId) {
+<span class="nc" id="L45">        rolePermissionService.removePermissionFromRole(roleId, permissionId);</span>
+<span class="nc" id="L46">        return ResponseEntity.noContent().build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
