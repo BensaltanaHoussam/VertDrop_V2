@@ -1,0 +1,16 @@
+com\vertdrop_v2\controller\ColisControllerIntegrationTest.class
+com\vertdrop_v2\controller\ProduitControllerTest.class
+com\vertdrop_v2\service\LivreurServiceImplTest.class
+com\vertdrop_v2\service\DestinataireServiceImplTest.class
+com\vertdrop_v2\controller\LivreurControllerTest.class
+com\vertdrop_v2\controller\ClientControllerTest.class
+com\vertdrop_v2\service\ClientServiceImplTest.class
+com\vertdrop_v2\VertDropV2ApplicationTests.class
+com\vertdrop_v2\service\ZoneServiceImplTest.class
+com\vertdrop_v2\service\ProduitServiceImplTest.class
+com\vertdrop_v2\service\ColisServiceImplTest$1.class
+com\vertdrop_v2\controller\ClientControllerIntegrationTest.class
+com\vertdrop_v2\controller\ColisControllerTest.class
+com\vertdrop_v2\controller\DestinataireControllerTest.class
+com\vertdrop_v2\controller\ZoneControllerTest.class
+com\vertdrop_v2\service\ColisServiceImplTest.class
