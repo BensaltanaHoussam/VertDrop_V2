@@ -26,6 +26,7 @@ import java.util. List;
 @Validated
 public class ClientController {
 
+
     private static final Logger log = LoggerFactory.getLogger(ClientController.class);
     private final ClientService clientService;
     private final AuthService authService;
