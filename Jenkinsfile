@@ -36,6 +36,20 @@ pipeline {
                 sh 'docker build -t vertdrop-app:latest .'
             }
         }
+
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
+                    sh '''
+                        echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin
+                        docker tag vertdrop-app:${BUILD_NUMBER} $DOCKERHUB_USERNAME/$IMAGE_NAME:${BUILD_NUMBER}
+                        docker tag vertdrop-app:latest $DOCKERHUB_USERNAME/$IMAGE_NAME:latest
+                        docker push $DOCKERHUB_USERNAME/$IMAGE_NAME:${BUILD_NUMBER}
+                        docker push $DOCKERHUB_USERNAME/$IMAGE_NAME:latest
+                    '''
+                }
+            }
+        }
     }
 
     post {
