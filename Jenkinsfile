@@ -8,8 +8,6 @@ pipeline {
         jdk 'jdk17'
     }
     environment {
-            JAVA_HOME = "${tool 'jdk17'}"
-            PATH = "${JAVA_HOME}/bin:${env.PATH}"
             DOCKERHUB_USERNAME = 'bensaltanahoussam'
             IMAGE_NAME = 'vertdrop-v2'
     }
