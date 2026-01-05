@@ -1,0 +1,42 @@
+spring:
+  # 1. Use H2 Database (In-Memory)
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+  liquibase:
+    enabled: false
+
+  # 2. Dummy OAuth2 Credentials (so the app can start without Env Vars)
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: dummy-google-id
+            client-secret: dummy-google-secret
+            scope: openid,profile,email
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+          facebook:
+            client-id: dummy-facebook-id
+            client-secret: dummy-facebook-secret
+            scope: email,public_profile
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+          okta:
+            client-id: dummy-okta-id
+            client-secret: dummy-okta-secret
+            scope: openid,profile,email
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          okta:
+            issuer-uri: https://dev-dummy.okta.com/
+
+# 3. Dummy JWT Secret (Must be long enough if your app checks length)
+jwt:
+  secret: test-secret-key-that-is-very-long-and-secure-enough-for-testing-purposes-only
+  expiration-ms: 86400000
