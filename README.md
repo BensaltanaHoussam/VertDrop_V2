@@ -39,7 +39,7 @@ La société cliente souhaite remplacer une gestion manuelle (Excel / papier) pa
 - Colis : id, description, poids, statut, priorite, livreur_id, client_id, destinataire_id, zone_id, villeDestination
 - Zone : id, nom, codePostal
 - HistoriqueLivraison : id, colis_id, statut, dateChangement, commentaire
-- Produit, Colis_Produit (multi-produits)
+- Produit, Colis_Produit (multi-produits) .  
 
 ## Architecture & bonnes pratiques
 - Layers : Controller → Service → Repository (Spring Data JPA)
