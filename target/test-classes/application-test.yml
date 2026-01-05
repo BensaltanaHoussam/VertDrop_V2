@@ -1,0 +1,53 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  # 1. Use H2 Database (In-Memory)
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+  liquibase:
+    enabled: false
+
+  # 2. Overwrite OAuth2 Settings
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: dummy-google
+            client-secret: dummy-secret
+            redirect-uri: "{baseUrl}/login/oauth2/code/google"
+          facebook:
+            client-id: dummy-facebook
+            client-secret: dummy-secret
+            redirect-uri: "{baseUrl}/login/oauth2/code/facebook"
+          okta:
+            client-id: dummy-okta
+            client-secret: dummy-secret
+            redirect-uri: "{baseUrl}/login/oauth2/code/okta"
+        provider:
+          okta:
+            issuer-uri: https://dev-dummy.okta.com/
+
+# 3. Define the Environment Variables here to prevent "Could not resolve placeholder" errors
+GOOGLE_CLIENT_ID: dummy
+GOOGLE_CLIENT_SECRET: dummy
+FACEBOOK_APP_ID: dummy
+FACEBOOK_APP_SECRET: dummy
+OKTA_CLIENT_ID: dummy
+OKTA_CLIENT_SECRET: dummy
+OKTA_ISSUER_URI: https://dummy.com
+JWT_SECRET: test-secret-key-that-is-very-long-and-secure-enough-for-testing-purposes-only
+JWT_EXPIRATION_MS: 86400000
+
+jwt:
+  secret: test-secret-key-that-is-very-long-and-secure-enough-for-testing-purposes-only
+  expiration-ms: 86400000
