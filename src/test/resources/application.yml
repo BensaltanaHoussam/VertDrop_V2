@@ -1,8 +1,4 @@
 spring:
-  config:
-    activate:
-      on-profile: test
-
   # 1. Use H2 Database (In-Memory)
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
@@ -16,6 +12,10 @@ spring:
   liquibase:
     enabled: false
 
+  # IMPORTANT: Overwrite the config import so it doesn't look for .env
+  config:
+    import: []
+
   # 2. Dummy OAuth2 Credentials
   security:
     oauth2:
@@ -26,19 +26,16 @@ spring:
             client-secret: dummy-google-secret
             scope: openid,profile,email
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-            client-name: Google
           facebook:
             client-id: dummy-facebook-id
             client-secret: dummy-facebook-secret
             scope: email,public_profile
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-            client-name: Facebook
           okta:
             client-id: dummy-okta-id
             client-secret: dummy-okta-secret
             scope: openid,profile,email
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-            client-name: Okta
         provider:
           okta:
             issuer-uri: https://dev-dummy.okta.com/
