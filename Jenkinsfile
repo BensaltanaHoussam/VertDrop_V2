@@ -7,10 +7,7 @@ pipeline {
         maven 'Maven_3.9'
         jdk 'jdk17'
     }
-    environment {
-            DOCKERHUB_USERNAME = 'bensaltanahoussam'
-            IMAGE_NAME = 'vertdrop-v2'
-    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -37,19 +34,19 @@ pipeline {
             }
         }
 
-        stage('Push Docker Image') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
-                    sh '''
-                        echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin
-                        docker tag vertdrop-app:${BUILD_NUMBER} $DOCKERHUB_USERNAME/$IMAGE_NAME:${BUILD_NUMBER}
-                        docker tag vertdrop-app:latest $DOCKERHUB_USERNAME/$IMAGE_NAME:latest
-                        docker push $DOCKERHUB_USERNAME/$IMAGE_NAME:${BUILD_NUMBER}
-                        docker push $DOCKERHUB_USERNAME/$IMAGE_NAME:latest
-                    '''
-                }
-            }
-        }
+        stage('Build & Push Docker Image') {
+           steps {
+               script {
+                   withCredentials([usernamePassword(credentialsId: 'dockerhub-id', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                       sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                       sh "docker build -t ${DOCKER_USER}/vertdrop-app:${BUILD_NUMBER} ."
+                       sh "docker build -t ${DOCKER_USER}/vertdrop-app:latest ."
+                       sh "docker push ${DOCKER_USER}/vertdrop-app:${BUILD_NUMBER}"
+                       sh "docker push ${DOCKER_USER}/vertdrop-app:latest"
+                   }
+               }
+           }
+           }
     }
 
     post {
