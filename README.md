@@ -30,7 +30,7 @@ La société cliente souhaite remplacer une gestion manuelle (Excel / papier) pa
 - NotFoundException pour centraliser les 404.
 - Journalisation SLF4J dans services et controllers.
 - Migrations via Liquibase.
-- Documentation OpenAPI / Swagger (si activé).
+- Documentation OpenAPI / Swagger (si activé)  .
 
 ## Modèle métier (tables principales)
 - ClientExpediteur : id, nom, prenom, email, telephone, adresse
