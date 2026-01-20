@@ -17,6 +17,8 @@ public class LivreurDTO {
     @Size(max = 255, message = "Le prénom ne doit pas dépasser 255 caractères.")
     private String prenom;
 
+    private String email;
+
     @Size(max = 20, message = "Le téléphone ne doit pas dépasser 20 caractères.")
     private String telephone;
 
@@ -25,4 +27,6 @@ public class LivreurDTO {
 
     @Positive(message = "L'identifiant de la zone assignée doit être un entier positif.")
     private Long zoneAssignee;
+
+    private String password;
 }

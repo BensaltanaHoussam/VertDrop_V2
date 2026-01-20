@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-01-19T12:03:23+0100",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
+    date = "2026-01-20T09:19:40+0100",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.45.0.v20260101-2150, environment: Java 21.0.9 (Eclipse Adoptium)"
 )
 @Component
 public class DestinataireMapperImpl implements DestinataireMapper {
@@ -21,12 +21,12 @@ public class DestinataireMapperImpl implements DestinataireMapper {
 
         DestinataireDTO destinataireDTO = new DestinataireDTO();
 
+        destinataireDTO.setAdresse( entity.getAdresse() );
+        destinataireDTO.setEmail( entity.getEmail() );
         destinataireDTO.setId( entity.getId() );
         destinataireDTO.setNom( entity.getNom() );
         destinataireDTO.setPrenom( entity.getPrenom() );
-        destinataireDTO.setEmail( entity.getEmail() );
         destinataireDTO.setTelephone( entity.getTelephone() );
-        destinataireDTO.setAdresse( entity.getAdresse() );
 
         return destinataireDTO;
     }
@@ -39,12 +39,12 @@ public class DestinataireMapperImpl implements DestinataireMapper {
 
         Destinataire destinataire = new Destinataire();
 
+        destinataire.setAdresse( dto.getAdresse() );
+        destinataire.setEmail( dto.getEmail() );
         destinataire.setId( dto.getId() );
         destinataire.setNom( dto.getNom() );
         destinataire.setPrenom( dto.getPrenom() );
-        destinataire.setEmail( dto.getEmail() );
         destinataire.setTelephone( dto.getTelephone() );
-        destinataire.setAdresse( dto.getAdresse() );
 
         return destinataire;
     }

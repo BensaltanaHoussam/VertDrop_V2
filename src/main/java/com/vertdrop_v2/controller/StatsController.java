@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/stats")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('MANAGER', 'CLIENT')")
 @Tag(name = "Statistics", description = "Endpoints for aggregate statistics and KPIs")
 public class StatsController {
 
