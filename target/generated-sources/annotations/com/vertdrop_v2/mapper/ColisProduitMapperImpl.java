@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-01-20T09:19:40+0100",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.45.0.v20260101-2150, environment: Java 21.0.9 (Eclipse Adoptium)"
+    date = "2026-01-20T10:28:36+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
 )
 @Component
 public class ColisProduitMapperImpl implements ColisProduitMapper {
@@ -25,10 +25,10 @@ public class ColisProduitMapperImpl implements ColisProduitMapper {
 
         ColisProduitDTO colisProduitDTO = new ColisProduitDTO();
 
-        colisProduitDTO.setDateAjout( entity.getDateAjout() );
-        colisProduitDTO.setPrix( entity.getPrix() );
         colisProduitDTO.setProduit( produitMapper.toDto( entity.getProduit() ) );
         colisProduitDTO.setQuantite( entity.getQuantite() );
+        colisProduitDTO.setPrix( entity.getPrix() );
+        colisProduitDTO.setDateAjout( entity.getDateAjout() );
 
         return colisProduitDTO;
     }
@@ -42,9 +42,9 @@ public class ColisProduitMapperImpl implements ColisProduitMapper {
         ColisProduit colisProduit = new ColisProduit();
 
         colisProduit.setProduit( produitMapper.toEntity( dto.getProduit() ) );
-        colisProduit.setDateAjout( dto.getDateAjout() );
-        colisProduit.setPrix( dto.getPrix() );
         colisProduit.setQuantite( dto.getQuantite() );
+        colisProduit.setPrix( dto.getPrix() );
+        colisProduit.setDateAjout( dto.getDateAjout() );
 
         return colisProduit;
     }

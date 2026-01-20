@@ -1,14 +1,14 @@
-package com.vertdrop_v2.service. impl;
+package com.vertdrop_v2.service.impl;
 
-import com.vertdrop_v2.dto. PermissionDTO;
-import com. vertdrop_v2.entity.Permission;
+import com.vertdrop_v2.dto.PermissionDTO;
+import com.vertdrop_v2.entity.Permission;
 import com.vertdrop_v2.repository.PermissionRepository;
 import com.vertdrop_v2.service.PermissionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util. List;
-import java.util. Optional;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,7 +29,7 @@ public class PermissionServiceImpl implements PermissionService {
 
         Permission permission = new Permission();
         permission.setName(permissionDTO.getName());
-        permission. setDescription(permissionDTO.getDescription());
+        permission.setDescription(permissionDTO.getDescription());
 
         Permission saved = permissionRepository.save(permission);
         return toDTO(saved);
@@ -44,9 +44,9 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     @Transactional(readOnly = true)
     public List<PermissionDTO> findAll() {
-        return permissionRepository. findAll().stream()
+        return permissionRepository.findAll().stream()
                 .map(this::toDTO)
-                .collect(Collectors. toList());
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -58,7 +58,6 @@ public class PermissionServiceImpl implements PermissionService {
         return new PermissionDTO(
                 permission.getId(),
                 permission.getName(),
-                permission.getDescription()
-        );
+                permission.getDescription());
     }
 }

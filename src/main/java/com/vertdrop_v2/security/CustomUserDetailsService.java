@@ -17,10 +17,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // La seule responsabilité de cette méthode est de trouver un utilisateur par son nom.
+    public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
+        // La seule responsabilité de cette méthode est de trouver un utilisateur par
+        // son nom ou son email.
         // Si elle ne le trouve pas, elle lance une exception.
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé avec le nom : " + username));
+        return userRepository.findByUsernameOrEmail(identifier, identifier)
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        "Utilisateur non trouvé avec l'identifiant : " + identifier));
     }
 }

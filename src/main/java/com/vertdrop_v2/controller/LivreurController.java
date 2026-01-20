@@ -1,23 +1,23 @@
 package com.vertdrop_v2.controller;
 
 import com.vertdrop_v2.dto.ColisDTO;
-import com.vertdrop_v2.dto. LivreurDTO;
+import com.vertdrop_v2.dto.LivreurDTO;
 import com.vertdrop_v2.exception.NotFoundException;
 import com.vertdrop_v2.service.AuthService;
 import com.vertdrop_v2.service.ColisService;
-import com.vertdrop_v2.service. LivreurService;
+import com.vertdrop_v2.service.LivreurService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.responses. ApiResponses;
-import io. swagger.v3.oas. annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints. Positive;
+import jakarta.validation.constraints.Positive;
 import org.slf4j.Logger;
-import org. slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access. prepost.PreAuthorize;
-import org.springframework.validation. annotation.Validated;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public class LivreurController {
     public LivreurController(LivreurService livreurService, ColisService colisService, AuthService authService) {
         this.livreurService = livreurService;
         this.colisService = colisService;
-        this. authService = authService;
+        this.authService = authService;
     }
 
     @GetMapping
@@ -132,7 +132,7 @@ public class LivreurController {
                 .orElseThrow(() -> new NotFoundException("Livreur introuvable id=" + id));
         log.info("DELETE /api/livreurs/{}", id);
         livreurService.deleteById(id);
-        return ResponseEntity. noContent().build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/colis")
@@ -160,9 +160,6 @@ public class LivreurController {
         return ResponseEntity.ok(colisService.findByLivreurId(id));
     }
 
-
-
-
     @GetMapping("/me")
     @PreAuthorize("hasRole('LIVREUR')")
     @Operation(summary = "Mon profil", description = "Retourne le profil du livreur connecté.")
@@ -174,8 +171,6 @@ public class LivreurController {
                 .orElseThrow(() -> new RuntimeException("Livreur not found for current user"));
         return ResponseEntity.ok(livreur);
     }
-
-
 
     @GetMapping("/me/colis")
     @PreAuthorize("hasRole('LIVREUR')")

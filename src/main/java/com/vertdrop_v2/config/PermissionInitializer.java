@@ -1,8 +1,8 @@
 package com.vertdrop_v2.config;
 
 import com.vertdrop_v2.entity.Permission;
-import com. vertdrop_v2.entity.Role;
-import com.vertdrop_v2.repository. PermissionRepository;
+import com.vertdrop_v2.entity.Role;
+import com.vertdrop_v2.repository.PermissionRepository;
 import com.vertdrop_v2.repository.RoleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,7 @@ import java.util.List;
 @Order(3) // Run after DataInitializer (1) and BusinessDataInitializer (2)
 public class PermissionInitializer implements CommandLineRunner {
 
-    private static final Logger logger = LoggerFactory. getLogger(PermissionInitializer.class);
+    private static final Logger logger = LoggerFactory.getLogger(PermissionInitializer.class);
 
     private final PermissionRepository permissionRepository;
     private final RoleRepository roleRepository;
@@ -34,7 +34,7 @@ public class PermissionInitializer implements CommandLineRunner {
         logger.info("🔐 --- Starting Permission Initialization ---");
 
         if (permissionRepository.count() > 0) {
-            logger. info("ℹ️ Permissions already exist. Skipping initialization.");
+            logger.info("ℹ️ Permissions already exist. Skipping initialization.");
             return;
         }
 
@@ -51,8 +51,7 @@ public class PermissionInitializer implements CommandLineRunner {
                 createPermission("CLIENT_MANAGE", "Manage clients"),
 
                 createPermission("STATS_VIEW", "View statistics"),
-                createPermission("ADMIN_PANEL", "Access admin panel")
-        );
+                createPermission("ADMIN_PANEL", "Access admin panel"));
 
         permissionRepository.saveAll(permissions);
         logger.info("✅ Created {} permissions", permissions.size());
@@ -65,7 +64,7 @@ public class PermissionInitializer implements CommandLineRunner {
 
     private Permission createPermission(String name, String description) {
         Permission permission = new Permission();
-        permission. setName(name);
+        permission.setName(name);
         permission.setDescription(description);
         return permission;
     }
@@ -78,14 +77,14 @@ public class PermissionInitializer implements CommandLineRunner {
         Role clientRole = roleRepository.findByName("ROLE_CLIENT")
                 .orElseThrow(() -> new RuntimeException("ROLE_CLIENT not found"));
 
-        // MANAGER:  All permissions
+        // MANAGER: All permissions
         managerRole.getPermissions().addAll(permissionRepository.findAll());
         roleRepository.save(managerRole);
         logger.info("✅ Assigned all permissions to ROLE_MANAGER");
 
         // LIVREUR: Read colis, update status
         livreurRole.getPermissions().add(findPermission("COLIS_READ"));
-        livreurRole. getPermissions().add(findPermission("COLIS_STATUS_UPDATE"));
+        livreurRole.getPermissions().add(findPermission("COLIS_STATUS_UPDATE"));
         roleRepository.save(livreurRole);
         logger.info("✅ Assigned permissions to ROLE_LIVREUR");
 

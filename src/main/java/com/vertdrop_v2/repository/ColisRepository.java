@@ -36,8 +36,7 @@ public interface ColisRepository extends JpaRepository<Colis, Long> {
 
     List<Colis> findByClientExpediteurAndStatutIn(
             ClientExpediteur client,
-            List<StatutColis> statuts
-    );
+            List<StatutColis> statuts);
 
     /* ===================== AGGREGATION ===================== */
 
@@ -47,71 +46,72 @@ public interface ColisRepository extends JpaRepository<Colis, Long> {
     /* ===================== FILTERS (ADMIN / ALL) ===================== */
 
     @Query("""
-        SELECT c FROM Colis c
-        WHERE
-            (:statut IS NULL OR c.statut = :statut)
-        AND (:zoneId IS NULL OR c.zone.id = :zoneId)
-        AND (
-            :keyword = ''
-            OR LOWER(c.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
-            OR LOWER(c.clientExpediteur.nom) LIKE LOWER(CONCAT('%', :keyword, '%'))
-            OR LOWER(c.clientExpediteur.prenom) LIKE LOWER(CONCAT('%', :keyword, '%'))
-            OR LOWER(c.destinataire.nom) LIKE LOWER(CONCAT('%', :keyword, '%'))
-            OR LOWER(c.destinataire.prenom) LIKE LOWER(CONCAT('%', :keyword, '%'))
-        )
-    """)
+                SELECT c FROM Colis c
+                WHERE
+                    (:statut IS NULL OR c.statut = :statut)
+                AND (:zoneId IS NULL OR c.zone.id = :zoneId)
+                AND (:clientId IS NULL OR c.clientExpediteur.id = :clientId)
+                AND (:livreurId IS NULL OR c.livreur.id = :livreurId)
+                AND (
+                    :keyword = ''
+                    OR LOWER(c.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    OR LOWER(c.clientExpediteur.nom) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    OR LOWER(c.clientExpediteur.prenom) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    OR LOWER(c.destinataire.nom) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    OR LOWER(c.destinataire.prenom) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                )
+            """)
     Page<Colis> findWithFilters(
             @Param("statut") StatutColis statut,
             @Param("zoneId") Long zoneId,
             @Param("keyword") String keyword,
-            Pageable pageable
-    );
+            @Param("clientId") Long clientId,
+            @Param("livreurId") Long livreurId,
+            Pageable pageable);
 
     /* ===================== FILTERS (LIVREUR) ===================== */
 
     @Query("""
-        SELECT c FROM Colis c
-        WHERE
-            c.livreur.id = :livreurId
-        AND (:statut IS NULL OR c.statut = :statut)
-        AND (:zoneId IS NULL OR c.zone.id = :zoneId)
-        AND (
-            :keyword = ''
-            OR LOWER(c.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
-            OR LOWER(c.clientExpediteur.nom) LIKE LOWER(CONCAT('%', :keyword, '%'))
-            OR LOWER(c.clientExpediteur.prenom) LIKE LOWER(CONCAT('%', :keyword, '%'))
-            OR LOWER(c.destinataire.nom) LIKE LOWER(CONCAT('%', :keyword, '%'))
-            OR LOWER(c.destinataire.prenom) LIKE LOWER(CONCAT('%', :keyword, '%'))
-        )
-    """)
+                SELECT c FROM Colis c
+                WHERE
+                    c.livreur.id = :livreurId
+                AND (:statut IS NULL OR c.statut = :statut)
+                AND (:zoneId IS NULL OR c.zone.id = :zoneId)
+                AND (
+                    :keyword = ''
+                    OR LOWER(c.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    OR LOWER(c.clientExpediteur.nom) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    OR LOWER(c.clientExpediteur.prenom) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    OR LOWER(c.destinataire.nom) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    OR LOWER(c.destinataire.prenom) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                )
+            """)
     Page<Colis> findWithFiltersAndLivreur(
             @Param("statut") StatutColis statut,
             @Param("zoneId") Long zoneId,
             @Param("keyword") String keyword,
             @Param("livreurId") Long livreurId,
-            Pageable pageable
-    );
+            Pageable pageable);
 
     /* ===================== FILTERS (CLIENT) ===================== */
 
     @Query("""
-        SELECT c FROM Colis c
-        WHERE
-            c.clientExpediteur.id = :clientId
-        AND (:statut IS NULL OR c.statut = :statut)
-        AND (:zoneId IS NULL OR c.zone.id = :zoneId)
-        AND (
-            :keyword = ''
-            OR LOWER(c.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
-            OR LOWER(c.destinataire.nom) LIKE LOWER(CONCAT('%', :keyword, '%'))
-            OR LOWER(c.destinataire.prenom) LIKE LOWER(CONCAT('%', :keyword, '%'))
-        )
-    """)
+                SELECT c FROM Colis c
+                WHERE
+                    c.clientExpediteur.id = :clientId
+                AND (:statut IS NULL OR c.statut = :statut)
+                AND (:zoneId IS NULL OR c.zone.id = :zoneId)
+                AND (
+                    :keyword = ''
+                    OR LOWER(c.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    OR LOWER(c.destinataire.nom) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    OR LOWER(c.destinataire.prenom) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                )
+            """)
     Page<Colis> findWithFiltersAndClient(
             @Param("statut") StatutColis statut,
             @Param("zoneId") Long zoneId,
             @Param("keyword") String keyword,
             @Param("clientId") Long clientId,
-            Pageable pageable
-    );
+            Pageable pageable);
 }

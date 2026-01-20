@@ -15,6 +15,7 @@ C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\dto\ProduitDTO.java
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\repository\HistoriqueLivraisonRepository.java
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\security\CustomOAuth2UserService.java
+C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\dto\StatsSummaryDTO.java
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\mapper\LivreurMapper.java
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\entity\Role.java
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\repository\DestinataireRepository.java
@@ -28,6 +29,7 @@ C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\config\DataInitializer.java
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\entity\HistoriqueLivraison.java
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\repository\UserRepository.java
+C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\service\StatsService.java
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\entity\ClientExpediteur.java
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\entity\User.java
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\VertDropV2Application.java
@@ -68,6 +70,7 @@ C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\config\PermissionInitializer.java
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\dto\ColisCreateRequestDTO.java
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\entity\AuthProvider.java
+C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\controller\StatsController.java
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\service\ZoneService.java
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\dto\UserDTO.java
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\controller\ClientController.java
@@ -84,6 +87,7 @@ C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\mapper\ClientExpediteurMapper.java
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\security\JwtService.java
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\exception\ErrorResponseDTO.java
+C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\service\impl\StatsServiceImpl.java
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\controller\ColisController.java
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\service\impl\ProduitServiceImpl.java
 C:\Java Projects\VERTDROP APPLICATION\VertDrop_V2\src\main\java\com\vertdrop_v2\dto\ColisDTO.java

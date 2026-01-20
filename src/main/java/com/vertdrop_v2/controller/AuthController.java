@@ -1,13 +1,13 @@
 package com.vertdrop_v2.controller;
 
-import com. vertdrop_v2.dto.auth.LoginRequest;
+import com.vertdrop_v2.dto.auth.LoginRequest;
 import com.vertdrop_v2.dto.auth.LoginResponse;
 import com.vertdrop_v2.entity.User;
-import com.vertdrop_v2.security. JwtService;
+import com.vertdrop_v2.security.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.slf4j. Logger;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,7 +15,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security. core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -28,12 +28,10 @@ import java.util.Map;
 @Tag(name = "Authentication", description = "Authentication endpoints for classic login and OAuth2")
 public class AuthController {
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthController. class);
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
-
-
 
     @PostMapping("/login")
     @Operation(summary = "Login with username and password", description = "Authenticate user and return JWT token")
@@ -45,9 +43,7 @@ public class AuthController {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getUsername(),
-                            request.getPassword()
-                    )
-            );
+                            request.getPassword()));
 
             // Get authenticated user details
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -58,24 +54,21 @@ public class AuthController {
             // Calculate expiration time
             long expiresAt = System.currentTimeMillis() + jwtService.getExpirationTime();
 
-            logger.info("✅ Login successful for user: {}", request. getUsername());
+            logger.info("✅ Login successful for user: {}", request.getUsername());
 
             // Return response
             LoginResponse response = new LoginResponse(token, "Bearer", expiresAt);
-            return ResponseEntity. ok(response);
+            return ResponseEntity.ok(response);
 
         } catch (BadCredentialsException ex) {
             logger.warn("❌ Invalid credentials for user: {}", request.getUsername());
 
-
-
-
             Map<String, String> error = new HashMap<>();
-            error. put("error", "Unauthorized");
+            error.put("error", "Unauthorized");
             error.put("message", "Invalid username or password");
             error.put("status", "401");
 
-            return ResponseEntity. status(401).body(error);
+            return ResponseEntity.status(401).body(error);
 
         } catch (Exception ex) {
             logger.error("❌ Authentication error for user {}: {}", request.getUsername(), ex.getMessage());
@@ -89,8 +82,6 @@ public class AuthController {
         }
     }
 
-
-
     @GetMapping("/me")
     @Operation(summary = "Get current user", description = "Returns information about the currently authenticated user")
     public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
@@ -98,7 +89,7 @@ public class AuthController {
             logger.warn("⚠️ Unauthorized access attempt to /auth/me");
 
             Map<String, String> error = new HashMap<>();
-            error. put("error", "Unauthorized");
+            error.put("error", "Unauthorized");
             error.put("message", "No valid authentication found");
             error.put("status", "401");
 
@@ -120,7 +111,7 @@ public class AuthController {
             response.put("fullName", user.getFullName());
             response.put("provider", user.getProvider().toString());
             response.put("isOAuth2User", user.isOAuth2User());
-            response.put("roles", user. getRoles().stream()
+            response.put("roles", user.getRoles().stream()
                     .map(role -> role.getName())
                     .toList());
         } else {

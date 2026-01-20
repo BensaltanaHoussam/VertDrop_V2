@@ -47,11 +47,11 @@ public class ColisServiceImpl implements ColisService {
     private final ColisMapper colisMapper;
 
     public ColisServiceImpl(ColisRepository colisRepository,
-                            HistoriqueLivraisonRepository historiqueLivraisonRepository,
-                            HistoriqueLivraisonMapper historiqueLivraisonMapper,
-                            LivreurRepository livreurRepository,
-                            ProduitRepository produitRepository,
-                            ColisMapper colisMapper) {
+            HistoriqueLivraisonRepository historiqueLivraisonRepository,
+            HistoriqueLivraisonMapper historiqueLivraisonMapper,
+            LivreurRepository livreurRepository,
+            ProduitRepository produitRepository,
+            ColisMapper colisMapper) {
         this.colisRepository = colisRepository;
         this.historiqueLivraisonRepository = historiqueLivraisonRepository;
         this.historiqueLivraisonMapper = historiqueLivraisonMapper;
@@ -106,7 +106,8 @@ public class ColisServiceImpl implements ColisService {
 
     @Override
     public ColisDTO save(ColisDTO colisDTO) {
-        if (colisDTO == null) throw new IllegalArgumentException("ColisDTO ne peut pas être nul.");
+        if (colisDTO == null)
+            throw new IllegalArgumentException("ColisDTO ne peut pas être nul.");
 
         // Mise à jour
         if (colisDTO.getId() != null) {
@@ -142,7 +143,8 @@ public class ColisServiceImpl implements ColisService {
     }
 
     private void rebuildColisProduits(Colis colis, List<ColisProduitDTO> items) {
-        if (items == null || items.isEmpty()) return;
+        if (items == null || items.isEmpty())
+            return;
 
         for (ColisProduitDTO it : items) {
             if (it.getProduit() == null || it.getProduit().getId() == null) {
@@ -153,7 +155,8 @@ public class ColisServiceImpl implements ColisService {
             }
 
             Produit produit = produitRepository.findById(it.getProduit().getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Produit introuvable id=" + it.getProduit().getId()));
+                    .orElseThrow(
+                            () -> new EntityNotFoundException("Produit introuvable id=" + it.getProduit().getId()));
 
             ColisProduit cp = new ColisProduit();
             ColisProduitId id = new ColisProduitId();
@@ -179,16 +182,16 @@ public class ColisServiceImpl implements ColisService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ColisDTO> findAll(Pageable pageable, StatutColis statut, Long zoneId, String keyword) {
+    public Page<ColisDTO> findAll(Pageable pageable, StatutColis statut, Long zoneId, String keyword, Long clientId,
+            Long livreurId) {
 
         if (keyword == null) {
             keyword = "";
         }
 
-        return colisRepository.findWithFilters(statut, zoneId, keyword, pageable)
+        return colisRepository.findWithFilters(statut, zoneId, keyword, clientId, livreurId, pageable)
                 .map(colisMapper::toDto);
     }
-
 
     @Override
     public void deleteById(Long id) {
@@ -288,6 +291,5 @@ public class ColisServiceImpl implements ColisService {
                 .map(colisMapper::toDto)
                 .collect(Collectors.toList());
     }
-
 
 }

@@ -2,31 +2,31 @@ package com.vertdrop_v2.controller;
 
 import com.vertdrop_v2.dto.ColisCreateRequestDTO;
 import com.vertdrop_v2.dto.ColisDTO;
-import com.vertdrop_v2.dto. HistoriqueLivraisonDTO;
+import com.vertdrop_v2.dto.HistoriqueLivraisonDTO;
 import com.vertdrop_v2.dto.UpdateStatusRequestDTO;
 import com.vertdrop_v2.entity.StatutColis;
-import com. vertdrop_v2.exception. NotFoundException;
+import com.vertdrop_v2.exception.NotFoundException;
 import com.vertdrop_v2.service.AuthService;
 import com.vertdrop_v2.service.ColisService;
-import com.vertdrop_v2.service. LivreurService;
+import com.vertdrop_v2.service.LivreurService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger. v3.oas.annotations. responses.ApiResponse;
-import io.swagger. v3.oas.annotations. Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints. Positive;
+import jakarta.validation.constraints.Positive;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain. Pageable;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind. annotation.*;
+import org.springframework.web.bind.annotation.*;
 
-import java.util. List;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/colis")
@@ -59,28 +59,32 @@ public class ColisController {
             @Parameter(hidden = true) Pageable pageable,
             @RequestParam(required = false) StatutColis statut,
             @RequestParam(required = false) @Positive Long zoneId,
+            @RequestParam(required = false) @Positive Long clientId,
+            @RequestParam(required = false) @Positive Long livreurId,
             @RequestParam(required = false) String keyword) {
-        log.info("GET /api/colis statut={}, zoneId={}, keyword={}", statut, zoneId, keyword);
+        log.info("GET /api/colis statut={}, zoneId={}, keyword={}, clientId={}, livreurId={}", statut, zoneId, keyword,
+                clientId, livreurId);
 
         // Filter by role
         if (authService.hasRole("ROLE_MANAGER")) {
             // Manager sees everything
-            return ResponseEntity.ok(colisService.findAll(pageable, statut, zoneId, keyword));
+            return ResponseEntity.ok(colisService.findAll(pageable, statut, zoneId, keyword, clientId, livreurId));
         } else if (authService.hasRole("ROLE_LIVREUR")) {
             // Livreur sees only his colis
-            Long livreurId = authService. getCurrentLivreur()
+            Long currentLivreurId = authService.getCurrentLivreur()
                     .orElseThrow(() -> new RuntimeException("Livreur not found for current user"))
                     .getId();
-            return ResponseEntity.ok(colisService.findAllForLivreur(livreurId, pageable, statut, zoneId, keyword));
+            return ResponseEntity
+                    .ok(colisService.findAllForLivreur(currentLivreurId, pageable, statut, zoneId, keyword));
         } else if (authService.hasRole("ROLE_CLIENT")) {
             // Client sees only his colis
-            Long clientId = authService.getCurrentClient()
+            Long currentClientId = authService.getCurrentClient()
                     .orElseThrow(() -> new RuntimeException("Client not found for current user"))
                     .getId();
-            return ResponseEntity.ok(colisService. findAllForClient(clientId, pageable, statut, zoneId, keyword));
+            return ResponseEntity.ok(colisService.findAllForClient(currentClientId, pageable, statut, zoneId, keyword));
         }
 
-        return ResponseEntity. status(HttpStatus.FORBIDDEN).build();
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @GetMapping("/{id}")
@@ -99,7 +103,7 @@ public class ColisController {
         // Check access rights
         if (authService.hasRole("ROLE_MANAGER")) {
             return ResponseEntity.ok(dto);
-        } else if (authService. hasRole("ROLE_LIVREUR")) {
+        } else if (authService.hasRole("ROLE_LIVREUR")) {
             Long livreurId = authService.getCurrentLivreur()
                     .orElseThrow(() -> new RuntimeException("Livreur not found"))
                     .getId();
@@ -109,7 +113,7 @@ public class ColisController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         } else if (authService.hasRole("ROLE_CLIENT")) {
             Long clientId = authService.getCurrentClient()
-                    . orElseThrow(() -> new RuntimeException("Client not found"))
+                    .orElseThrow(() -> new RuntimeException("Client not found"))
                     .getId();
             if (dto.getClientExpediteur() != null && dto.getClientExpediteur().getId().equals(clientId)) {
                 return ResponseEntity.ok(dto);
@@ -117,7 +121,7 @@ public class ColisController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        return ResponseEntity. status(HttpStatus.FORBIDDEN).build();
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @PostMapping
@@ -206,15 +210,16 @@ public class ColisController {
         if (authService.hasRole("ROLE_LIVREUR")) {
             ColisDTO colis = colisService.findById(id)
                     .orElseThrow(() -> new NotFoundException("Colis introuvable id=" + id));
-            Long livreurId = authService. getCurrentLivreur()
+            Long livreurId = authService.getCurrentLivreur()
                     .orElseThrow(() -> new RuntimeException("Livreur not found"))
-                    . getId();
+                    .getId();
             if (colis.getLivreur() == null || !colis.getLivreur().getId().equals(livreurId)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
         }
 
-        return ResponseEntity.ok(colisService.updateStatus(id, StatutColis.valueOf(statusRequest.getStatut().toUpperCase()), statusRequest.getCommentaire()));
+        return ResponseEntity.ok(colisService.updateStatus(id,
+                StatutColis.valueOf(statusRequest.getStatut().toUpperCase()), statusRequest.getCommentaire()));
     }
 
     @GetMapping("/{id}/colis")
@@ -231,7 +236,7 @@ public class ColisController {
         return ResponseEntity.ok(colisService.findByLivreurId(id));
     }
 
-    @PutMapping("/{colisId}/assign-livreur/{livreurId}")
+    @PutMapping("/{colisId}/assign/{livreurId}")
     @PreAuthorize("hasRole('MANAGER')")
     @Operation(summary = "Assigner un livreur", description = "Assigne un livreur à un colis (MANAGER uniquement).")
     @ApiResponses({
@@ -241,7 +246,7 @@ public class ColisController {
     public ResponseEntity<ColisDTO> assignLivreurToColis(
             @PathVariable("colisId") @Positive Long colisId,
             @PathVariable("livreurId") @Positive Long livreurId) {
-        log.info("PUT /api/colis/{}/assign-livreur/{}", colisId, livreurId);
+        log.info("PUT /api/colis/{}/assign/{}", colisId, livreurId);
         return ResponseEntity.ok(colisService.assignLivreur(colisId, livreurId));
     }
 
@@ -266,7 +271,7 @@ public class ColisController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
         } else if (authService.hasRole("ROLE_CLIENT")) {
-            Long clientId = authService. getCurrentClient()
+            Long clientId = authService.getCurrentClient()
                     .orElseThrow(() -> new RuntimeException("Client not found"))
                     .getId();
             if (colis.getClientExpediteur() == null || !colis.getClientExpediteur().getId().equals(clientId)) {
@@ -277,7 +282,6 @@ public class ColisController {
         log.info("GET /api/colis/{}/history", id);
         return ResponseEntity.ok(colisService.findHistoryForColis(id));
     }
-
 
     @GetMapping("/mes-colis")
     @PreAuthorize("hasAnyRole('LIVREUR', 'CLIENT')")
@@ -293,7 +297,7 @@ public class ColisController {
             return ResponseEntity.ok(colisService.findByLivreurId(livreurId));
         } else if (authService.hasRole("ROLE_CLIENT")) {
             Long clientId = authService.getCurrentClient()
-                    . orElseThrow(() -> new RuntimeException("Client not found"))
+                    .orElseThrow(() -> new RuntimeException("Client not found"))
                     .getId();
             return ResponseEntity.ok(colisService.findByClientId(clientId));
         }
