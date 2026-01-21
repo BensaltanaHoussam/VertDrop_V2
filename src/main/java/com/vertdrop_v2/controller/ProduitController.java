@@ -2,6 +2,7 @@ package com.vertdrop_v2.controller;
 
 import com.vertdrop_v2.dto.ProduitDTO;
 import com.vertdrop_v2.exception.NotFoundException;
+import com.vertdrop_v2.service.AuthService;
 import com.vertdrop_v2.service.ProduitService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,77 +22,128 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/produits")
-@PreAuthorize("hasRole('MANAGER')")
+@PreAuthorize("hasAnyRole('MANAGER', 'CLIENT')")
 @Tag(name = "Produits", description = "Endpoints de gestion des produits")
 @Validated
 public class ProduitController {
 
-    private static final Logger log = LoggerFactory.getLogger(ProduitController.class);
-    private final ProduitService produitService;
+        private static final Logger log = LoggerFactory.getLogger(ProduitController.class);
+        private final ProduitService produitService;
+        private final AuthService authService;
 
-    public ProduitController(ProduitService produitService) {
-        this.produitService = produitService;
-    }
+        public ProduitController(ProduitService produitService, AuthService authService) {
+                this.produitService = produitService;
+                this.authService = authService;
+        }
 
-    @GetMapping
-    @Operation(summary = "Lister les produits", description = "Retourne tous les produits.")
-    @ApiResponses(@ApiResponse(responseCode = "200", description = "Liste"))
-    public ResponseEntity<List<ProduitDTO>> getAllProduits() {
-        log.info("GET /api/produits");
-        return ResponseEntity.ok(produitService.findAll());
-    }
+        @GetMapping
+        @Operation(summary = "Lister les produits", description = "Retourne tous les produits (ou filtrés par client).")
+        @ApiResponses(@ApiResponse(responseCode = "200", description = "Liste"))
+        public ResponseEntity<List<ProduitDTO>> getAllProduits() {
+                log.info("GET /api/produits");
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Récupérer un produit", description = "Retourne un produit par identifiant.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Trouvé"),
-            @ApiResponse(responseCode = "404", description = "Introuvable")
-    })
-    public ResponseEntity<ProduitDTO> getProduitById(@PathVariable @Positive Long id) {
-        log.info("GET /api/produits/{}", id);
-        ProduitDTO dto = produitService.findById(id)
-                .orElseThrow(() -> new NotFoundException("Produit introuvable id=" + id));
-        return ResponseEntity.ok(dto);
-    }
+                // If user is a client, only return their products
+                if (authService.hasRole("ROLE_CLIENT")) {
+                        Long clientId = authService.getCurrentClient()
+                                        .orElseThrow(() -> new RuntimeException("Client not found"))
+                                        .getId();
+                        return ResponseEntity.ok(produitService.findByClientId(clientId));
+                }
 
-    @PostMapping
-    @Operation(summary = "Créer un produit", description = "Crée un nouveau produit.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Créé"),
-            @ApiResponse(responseCode = "400", description = "Données invalides")
-    })
-    public ResponseEntity<ProduitDTO> createProduit(@Valid @RequestBody ProduitDTO produitDTO) {
-        log.info("POST /api/produits");
-        return new ResponseEntity<>(produitService.save(produitDTO), HttpStatus.CREATED);
-    }
+                // Managers see all products
+                return ResponseEntity.ok(produitService.findAll());
+        }
 
-    @PutMapping("/{id}")
-    @Operation(summary = "Mettre à jour un produit", description = "Met à jour un produit existant.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Mis à jour"),
-            @ApiResponse(responseCode = "404", description = "Introuvable")
-    })
-    public ResponseEntity<ProduitDTO> updateProduit(
-            @PathVariable @Positive Long id,
-            @Valid @RequestBody ProduitDTO produitDTO) {
-        produitService.findById(id)
-                .orElseThrow(() -> new NotFoundException("Produit introuvable id=" + id));
-        produitDTO.setId(id);
-        log.info("PUT /api/produits/{}", id);
-        return ResponseEntity.ok(produitService.save(produitDTO));
-    }
+        @GetMapping("/{id}")
+        @Operation(summary = "Récupérer un produit", description = "Retourne un produit par identifiant.")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "Trouvé"),
+                        @ApiResponse(responseCode = "404", description = "Introuvable")
+        })
+        public ResponseEntity<ProduitDTO> getProduitById(@PathVariable @Positive Long id) {
+                log.info("GET /api/produits/{}", id);
+                ProduitDTO dto = produitService.findById(id)
+                                .orElseThrow(() -> new NotFoundException("Produit introuvable id=" + id));
+                return ResponseEntity.ok(dto);
+        }
 
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Supprimer un produit", description = "Supprime un produit.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Supprimé"),
-            @ApiResponse(responseCode = "404", description = "Introuvable")
-    })
-    public ResponseEntity<Void> deleteProduit(@PathVariable @Positive Long id) {
-        produitService.findById(id)
-                .orElseThrow(() -> new NotFoundException("Produit introuvable id=" + id));
-        log.info("DELETE /api/produits/{}", id);
-        produitService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
+        @PostMapping
+        @Operation(summary = "Créer un produit", description = "Crée un nouveau produit.")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "201", description = "Créé"),
+                        @ApiResponse(responseCode = "400", description = "Données invalides")
+        })
+        public ResponseEntity<ProduitDTO> createProduit(@Valid @RequestBody ProduitDTO produitDTO) {
+                log.info("POST /api/produits");
+
+                // If user is a client, set the client ID automatically
+                if (authService.hasRole("ROLE_CLIENT")) {
+                        Long clientId = authService.getCurrentClient()
+                                        .orElseThrow(() -> new RuntimeException("Client not found"))
+                                        .getId();
+                        produitDTO.setClientExpediteurId(clientId);
+                }
+
+                return new ResponseEntity<>(produitService.save(produitDTO), HttpStatus.CREATED);
+        }
+
+        @PutMapping("/{id}")
+        @Operation(summary = "Mettre à jour un produit", description = "Met à jour un produit existant.")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "Mis à jour"),
+                        @ApiResponse(responseCode = "404", description = "Introuvable"),
+                        @ApiResponse(responseCode = "403", description = "Accès refusé")
+        })
+        public ResponseEntity<ProduitDTO> updateProduit(
+                        @PathVariable @Positive Long id,
+                        @Valid @RequestBody ProduitDTO produitDTO) {
+
+                ProduitDTO existing = produitService.findById(id)
+                                .orElseThrow(() -> new NotFoundException("Produit introuvable id=" + id));
+
+                // If user is a client, verify ownership
+                if (authService.hasRole("ROLE_CLIENT")) {
+                        Long clientId = authService.getCurrentClient()
+                                        .orElseThrow(() -> new RuntimeException("Client not found"))
+                                        .getId();
+
+                        if (!clientId.equals(existing.getClientExpediteurId())) {
+                                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                        }
+
+                        // Ensure client can't change ownership
+                        produitDTO.setClientExpediteurId(clientId);
+                }
+
+                produitDTO.setId(id);
+                log.info("PUT /api/produits/{}", id);
+                return ResponseEntity.ok(produitService.save(produitDTO));
+        }
+
+        @DeleteMapping("/{id}")
+        @Operation(summary = "Supprimer un produit", description = "Supprime un produit.")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "204", description = "Supprimé"),
+                        @ApiResponse(responseCode = "404", description = "Introuvable"),
+                        @ApiResponse(responseCode = "403", description = "Accès refusé")
+        })
+        public ResponseEntity<Void> deleteProduit(@PathVariable @Positive Long id) {
+                ProduitDTO existing = produitService.findById(id)
+                                .orElseThrow(() -> new NotFoundException("Produit introuvable id=" + id));
+
+                // If user is a client, verify ownership
+                if (authService.hasRole("ROLE_CLIENT")) {
+                        Long clientId = authService.getCurrentClient()
+                                        .orElseThrow(() -> new RuntimeException("Client not found"))
+                                        .getId();
+
+                        if (!clientId.equals(existing.getClientExpediteurId())) {
+                                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                        }
+                }
+
+                log.info("DELETE /api/produits/{}", id);
+                produitService.deleteById(id);
+                return ResponseEntity.noContent().build();
+        }
 }

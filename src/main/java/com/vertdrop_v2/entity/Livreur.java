@@ -1,4 +1,4 @@
-package com. vertdrop_v2.entity;
+package com.vertdrop_v2.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

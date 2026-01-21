@@ -1,11 +1,11 @@
 package com.vertdrop_v2.controller;
 
-import com.vertdrop_v2.dto. PermissionDTO;
+import com.vertdrop_v2.dto.PermissionDTO;
 import com.vertdrop_v2.dto.RoleWithPermissionsDTO;
 import com.vertdrop_v2.service.RolePermissionService;
 import org.springframework.http.ResponseEntity;
-import org.springframework. security.access.prepost.PreAuthorize;
-import org. springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 
@@ -22,7 +22,7 @@ public class RolePermissionController {
 
     @GetMapping("/{roleId}/permissions")
     public ResponseEntity<Set<PermissionDTO>> getRolePermissions(@PathVariable Long roleId) {
-        return ResponseEntity.ok(rolePermissionService. getPermissionsByRoleId(roleId));
+        return ResponseEntity.ok(rolePermissionService.getPermissionsByRoleId(roleId));
     }
 
     @GetMapping("/{roleId}")

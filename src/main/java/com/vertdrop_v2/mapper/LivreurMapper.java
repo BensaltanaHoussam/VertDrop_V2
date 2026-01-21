@@ -7,7 +7,10 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring", uses = ZoneMapper.class)
 public interface LivreurMapper {
 
+    @org.mapstruct.Mapping(source = "user.email", target = "email")
+    @org.mapstruct.Mapping(target = "password", ignore = true)
     LivreurDTO toDto(Livreur entity);
 
+    @org.mapstruct.Mapping(target = "user", ignore = true)
     Livreur toEntity(LivreurDTO dto);
 }

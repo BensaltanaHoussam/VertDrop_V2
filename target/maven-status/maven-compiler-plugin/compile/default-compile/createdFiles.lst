@@ -20,6 +20,7 @@ com\vertdrop_v2\mapper\LivreurMapperImpl.class
 com\vertdrop_v2\controller\LivreurController.class
 com\vertdrop_v2\mapper\ClientExpediteurMapper.class
 com\vertdrop_v2\repository\UserRepository.class
+com\vertdrop_v2\service\impl\StatsServiceImpl.class
 com\vertdrop_v2\controller\AuthController.class
 com\vertdrop_v2\dto\ColisCreateRequestDTO.class
 com\vertdrop_v2\dto\DestinataireDTO.class
@@ -54,9 +55,11 @@ com\vertdrop_v2\mapper\ProduitMapper.class
 com\vertdrop_v2\repository\ClientExpediteurRepository.class
 com\vertdrop_v2\security\JwtAuthenticationFilter.class
 com\vertdrop_v2\service\impl\ProduitServiceImpl.class
+com\vertdrop_v2\dto\StatsSummaryDTO.class
 com\vertdrop_v2\repository\LivreurRepository.class
 com\vertdrop_v2\config\PasswordEncoderConfig.class
 com\vertdrop_v2\mapper\ZoneMapperImpl.class
+com\vertdrop_v2\dto\StatsSummaryDTO$StatsSummaryDTOBuilder.class
 com\vertdrop_v2\entity\ColisProduit.class
 com\vertdrop_v2\mapper\LivreurMapper.class
 com\vertdrop_v2\controller\DestinataireController.class
@@ -65,9 +68,11 @@ com\vertdrop_v2\entity\Role.class
 com\vertdrop_v2\repository\DestinataireRepository.class
 com\vertdrop_v2\entity\Permission.class
 com\vertdrop_v2\mapper\ClientExpediteurMapperImpl.class
+com\vertdrop_v2\controller\StatsController.class
 com\vertdrop_v2\dto\auth\LoginRequest.class
 com\vertdrop_v2\security\JwtService.class
 com\vertdrop_v2\security\CustomOAuth2UserService.class
+com\vertdrop_v2\service\StatsService.class
 com\vertdrop_v2\service\impl\PermissionServiceImpl.class
 com\vertdrop_v2\service\ClientService.class
 com\vertdrop_v2\dto\auth\LoginResponse.class

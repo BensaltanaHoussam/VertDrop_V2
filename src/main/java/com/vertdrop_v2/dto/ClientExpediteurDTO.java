@@ -27,4 +27,6 @@ public class ClientExpediteurDTO {
 
     @Size(max = 255, message = "L'adresse ne doit pas dépasser 255 caractères.")
     private String adresse;
+
+    private String password;
 }

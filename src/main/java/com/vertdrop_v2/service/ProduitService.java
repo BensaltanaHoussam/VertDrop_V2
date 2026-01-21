@@ -13,5 +13,7 @@ public interface ProduitService {
 
     List<ProduitDTO> findAll();
 
+    List<ProduitDTO> findByClientId(Long clientId);
+
     void deleteById(Long id);
 }

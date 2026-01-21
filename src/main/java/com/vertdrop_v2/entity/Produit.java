@@ -33,6 +33,10 @@ public class Produit {
     @Column(precision = 10, scale = 2)
     private BigDecimal prix;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_expediteur_id")
+    private ClientExpediteur clientExpediteur;
+
     @OneToMany(mappedBy = "produit", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ColisProduit> colisProduits = new ArrayList<>();
 }
