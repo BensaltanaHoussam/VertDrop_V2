@@ -10,4 +10,5 @@ public class ProduitDTO {
     private String categorie;
     private BigDecimal poids;
     private BigDecimal prix;
+    private Long clientExpediteurId;
 }

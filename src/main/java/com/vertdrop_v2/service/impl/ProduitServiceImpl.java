@@ -46,6 +46,14 @@ public class ProduitServiceImpl implements ProduitService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<ProduitDTO> findByClientId(Long clientId) {
+        return produitRepository.findByClientExpediteurId(clientId).stream()
+                .map(produitMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void deleteById(Long id) {
         produitRepository.deleteById(id);
     }

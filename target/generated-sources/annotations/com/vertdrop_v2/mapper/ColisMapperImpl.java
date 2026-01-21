@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-01-20T10:28:36+0100",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
+    date = "2026-01-21T09:23:36+0100",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.45.0.v20260101-2150, environment: Java 21.0.9 (Eclipse Adoptium)"
 )
 @Component
 public class ColisMapperImpl implements ColisMapper {
@@ -41,18 +41,18 @@ public class ColisMapperImpl implements ColisMapper {
 
         ColisDTO colisDTO = new ColisDTO();
 
-        colisDTO.setId( entity.getId() );
-        colisDTO.setDescription( entity.getDescription() );
-        colisDTO.setPoids( entity.getPoids() );
-        colisDTO.setStatut( entity.getStatut() );
-        colisDTO.setPriorite( entity.getPriorite() );
-        colisDTO.setVilleDestination( entity.getVilleDestination() );
         colisDTO.setClientExpediteur( clientExpediteurMapper.toDto( entity.getClientExpediteur() ) );
-        colisDTO.setDestinataire( destinataireMapper.toDto( entity.getDestinataire() ) );
-        colisDTO.setLivreur( livreurMapper.toDto( entity.getLivreur() ) );
-        colisDTO.setZone( zoneMapper.toDto( entity.getZone() ) );
-        colisDTO.setHistoriqueLivraisons( historiqueLivraisonListToHistoriqueLivraisonDTOList( entity.getHistoriqueLivraisons() ) );
         colisDTO.setColisProduits( colisProduitListToColisProduitDTOList( entity.getColisProduits() ) );
+        colisDTO.setDescription( entity.getDescription() );
+        colisDTO.setDestinataire( destinataireMapper.toDto( entity.getDestinataire() ) );
+        colisDTO.setHistoriqueLivraisons( historiqueLivraisonListToHistoriqueLivraisonDTOList( entity.getHistoriqueLivraisons() ) );
+        colisDTO.setId( entity.getId() );
+        colisDTO.setLivreur( livreurMapper.toDto( entity.getLivreur() ) );
+        colisDTO.setPoids( entity.getPoids() );
+        colisDTO.setPriorite( entity.getPriorite() );
+        colisDTO.setStatut( entity.getStatut() );
+        colisDTO.setVilleDestination( entity.getVilleDestination() );
+        colisDTO.setZone( zoneMapper.toDto( entity.getZone() ) );
 
         return colisDTO;
     }
@@ -65,15 +65,15 @@ public class ColisMapperImpl implements ColisMapper {
 
         Colis colis = new Colis();
 
-        colis.setId( dto.getId() );
-        colis.setDescription( dto.getDescription() );
-        colis.setPoids( dto.getPoids() );
-        colis.setStatut( dto.getStatut() );
-        colis.setPriorite( dto.getPriorite() );
-        colis.setVilleDestination( dto.getVilleDestination() );
         colis.setClientExpediteur( clientExpediteurMapper.toEntity( dto.getClientExpediteur() ) );
+        colis.setDescription( dto.getDescription() );
         colis.setDestinataire( destinataireMapper.toEntity( dto.getDestinataire() ) );
+        colis.setId( dto.getId() );
         colis.setLivreur( livreurMapper.toEntity( dto.getLivreur() ) );
+        colis.setPoids( dto.getPoids() );
+        colis.setPriorite( dto.getPriorite() );
+        colis.setStatut( dto.getStatut() );
+        colis.setVilleDestination( dto.getVilleDestination() );
         colis.setZone( zoneMapper.toEntity( dto.getZone() ) );
 
         return colis;
@@ -90,19 +90,6 @@ public class ColisMapperImpl implements ColisMapper {
         return object;
     }
 
-    protected List<HistoriqueLivraisonDTO> historiqueLivraisonListToHistoriqueLivraisonDTOList(List<HistoriqueLivraison> list) {
-        if ( list == null ) {
-            return null;
-        }
-
-        List<HistoriqueLivraisonDTO> list1 = new ArrayList<HistoriqueLivraisonDTO>( list.size() );
-        for ( HistoriqueLivraison historiqueLivraison : list ) {
-            list1.add( historiqueLivraisonMapper.toDto( historiqueLivraison ) );
-        }
-
-        return list1;
-    }
-
     protected List<ColisProduitDTO> colisProduitListToColisProduitDTOList(List<ColisProduit> list) {
         if ( list == null ) {
             return null;
@@ -111,6 +98,19 @@ public class ColisMapperImpl implements ColisMapper {
         List<ColisProduitDTO> list1 = new ArrayList<ColisProduitDTO>( list.size() );
         for ( ColisProduit colisProduit : list ) {
             list1.add( colisProduitMapper.toDto( colisProduit ) );
+        }
+
+        return list1;
+    }
+
+    protected List<HistoriqueLivraisonDTO> historiqueLivraisonListToHistoriqueLivraisonDTOList(List<HistoriqueLivraison> list) {
+        if ( list == null ) {
+            return null;
+        }
+
+        List<HistoriqueLivraisonDTO> list1 = new ArrayList<HistoriqueLivraisonDTO>( list.size() );
+        for ( HistoriqueLivraison historiqueLivraison : list ) {
+            list1.add( historiqueLivraisonMapper.toDto( historiqueLivraison ) );
         }
 
         return list1;

@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-01-20T10:28:36+0100",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
+    date = "2026-01-21T09:23:36+0100",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.45.0.v20260101-2150, environment: Java 21.0.9 (Eclipse Adoptium)"
 )
 @Component
 public class HistoriqueLivraisonMapperImpl implements HistoriqueLivraisonMapper {
@@ -21,10 +21,10 @@ public class HistoriqueLivraisonMapperImpl implements HistoriqueLivraisonMapper 
 
         HistoriqueLivraisonDTO historiqueLivraisonDTO = new HistoriqueLivraisonDTO();
 
+        historiqueLivraisonDTO.setCommentaire( historiqueLivraison.getCommentaire() );
+        historiqueLivraisonDTO.setDateChangement( historiqueLivraison.getDateChangement() );
         historiqueLivraisonDTO.setId( historiqueLivraison.getId() );
         historiqueLivraisonDTO.setStatut( historiqueLivraison.getStatut() );
-        historiqueLivraisonDTO.setDateChangement( historiqueLivraison.getDateChangement() );
-        historiqueLivraisonDTO.setCommentaire( historiqueLivraison.getCommentaire() );
 
         return historiqueLivraisonDTO;
     }

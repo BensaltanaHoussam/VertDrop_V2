@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-01-20T10:28:36+0100",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
+    date = "2026-01-21T09:23:36+0100",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.45.0.v20260101-2150, environment: Java 21.0.9 (Eclipse Adoptium)"
 )
 @Component
 public class ClientExpediteurMapperImpl implements ClientExpediteurMapper {
@@ -23,11 +23,11 @@ public class ClientExpediteurMapperImpl implements ClientExpediteurMapper {
         ClientExpediteurDTO clientExpediteurDTO = new ClientExpediteurDTO();
 
         clientExpediteurDTO.setEmail( entityUserEmail( entity ) );
+        clientExpediteurDTO.setAdresse( entity.getAdresse() );
         clientExpediteurDTO.setId( entity.getId() );
         clientExpediteurDTO.setNom( entity.getNom() );
         clientExpediteurDTO.setPrenom( entity.getPrenom() );
         clientExpediteurDTO.setTelephone( entity.getTelephone() );
-        clientExpediteurDTO.setAdresse( entity.getAdresse() );
 
         return clientExpediteurDTO;
     }
@@ -40,12 +40,12 @@ public class ClientExpediteurMapperImpl implements ClientExpediteurMapper {
 
         ClientExpediteur clientExpediteur = new ClientExpediteur();
 
+        clientExpediteur.setAdresse( dto.getAdresse() );
+        clientExpediteur.setEmail( dto.getEmail() );
         clientExpediteur.setId( dto.getId() );
         clientExpediteur.setNom( dto.getNom() );
         clientExpediteur.setPrenom( dto.getPrenom() );
-        clientExpediteur.setEmail( dto.getEmail() );
         clientExpediteur.setTelephone( dto.getTelephone() );
-        clientExpediteur.setAdresse( dto.getAdresse() );
 
         return clientExpediteur;
     }
