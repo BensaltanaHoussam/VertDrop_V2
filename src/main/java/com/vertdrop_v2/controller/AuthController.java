@@ -105,6 +105,7 @@ public class AuthController {
         // If UserDetails is actually our User entity
         if (userDetails instanceof User) {
             User user = (User) userDetails;
+            response.put("id", user.getId());
             response.put("email", user.getEmail());
             response.put("firstName", user.getFirstName());
             response.put("lastName", user.getLastName());

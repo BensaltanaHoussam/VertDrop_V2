@@ -27,67 +27,68 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final CustomUserDetailsService userDetailsService;
-    private final OAuth2SuccessHandler oAuth2SuccessHandler;
-    private final CustomOAuth2UserService customOAuth2UserService;
-    private final PasswordEncoder passwordEncoder;
+        private final JwtAuthenticationFilter jwtAuthenticationFilter;
+        private final CustomUserDetailsService userDetailsService;
+        private final OAuth2SuccessHandler oAuth2SuccessHandler;
+        private final CustomOAuth2UserService customOAuth2UserService;
+        private final PasswordEncoder passwordEncoder;
 
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder);
-        return provider;
-    }
+        @Bean
+        public DaoAuthenticationProvider authenticationProvider() {
+                DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+                provider.setUserDetailsService(userDetailsService);
+                provider.setPasswordEncoder(passwordEncoder);
+                return provider;
+        }
 
-    @Bean
-    public AuthenticationManager authenticationManager(
-            org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration cfg
-    ) throws Exception {
-        return cfg.getAuthenticationManager();
-    }
+        @Bean
+        public AuthenticationManager authenticationManager(
+                        org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration cfg)
+                        throws Exception {
+                return cfg.getAuthenticationManager();
+        }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/auth/**","/api/v1/auth/**", "/actuator/**", "/oauth2/**", "/login/oauth2/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
-                        )
-                        .successHandler(oAuth2SuccessHandler)
-                )
-                .authenticationProvider(authenticationProvider());
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+                http
+                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                                .csrf(csrf -> csrf.disable())
+                                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                                .requestMatchers("/api/auth/login", "/api/auth/register", "/auth/login",
+                                                                "/auth/register",
+                                                                "/api/v1/auth/**", "/actuator/**", "/oauth2/**",
+                                                                "/login/oauth2/**")
+                                                .permitAll()
+                                                .anyRequest().authenticated())
+                                .oauth2Login(oauth2 -> oauth2
+                                                .userInfoEndpoint(userInfo -> userInfo
+                                                                .userService(customOAuth2UserService))
+                                                .successHandler(oAuth2SuccessHandler))
+                                .authenticationProvider(authenticationProvider());
 
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+                return http.build();
+        }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:4200",
-                "http://localhost:3000",
-                "http://localhost:8080"
-        ));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
+                configuration.setAllowedOrigins(Arrays.asList(
+                                "http://localhost:4200",
+                                "http://localhost:3000",
+                                "http://localhost:5173",
+                                "http://localhost:8080"));
+                configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+                configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
+                configuration.setAllowCredentials(true);
+                configuration.setMaxAge(3600L);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                source.registerCorsConfiguration("/**", configuration);
+                return source;
+        }
 }
